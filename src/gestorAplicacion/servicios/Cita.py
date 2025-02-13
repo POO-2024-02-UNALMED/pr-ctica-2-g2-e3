@@ -1,20 +1,19 @@
-"""
-Autores: Samuel Botero Rivera, Santiago Sanchez Ruiz, Samuel Gutierrez Betancur, Samuel Garcia Rojas
-"""
 
-from gestorAplicacion.personas import Doctor, Paciente
-from gestorAplicacion.servicios.servicio import Servicio  # Suponiendo que la clase Servicio esté definida en este módulo
+#autores: Samuel Botero Rivera, Santiago Sanchez Ruiz, Samuel Gutierrez Betancur, Samuel Garcia Rojas
 
-# Clase destinada a crear citas médicas
+from gestorAplicacion.personas.Doctor import Doctor  # Correct Doctor import
+from gestorAplicacion.personas.Paciente import Paciente  # Correct Paciente import
+from gestorAplicacion.servicios.Servicio import Servicio  # Correct Servicio import
+
 class Cita(Servicio):
-    # Constructor
     def __init__(self, doctor: Doctor, fecha: str, paciente: Paciente):
         super().__init__(paciente)
         self.doctor = doctor
         self.fecha = fecha
 
-    # Método que busca el estado de pago de una cita médica y lo cambia
-    def validarPago(self, paciente: Paciente, idServicio: int):
-        for cita in paciente.getHistoriaClinica().getHistorialCitas():
-            if cita.getIdServicio() == idServicio:
-                cita.setEstadoPago(True)
+    # Fix method signature to match Servicio's abstract method
+    def validarPago(self):  # Remove redundant parameters
+        # Example implementation:
+        if self.paciente.eps == "Subsidiado":
+            self.estadoPago = True
+        return self.estadoPago
