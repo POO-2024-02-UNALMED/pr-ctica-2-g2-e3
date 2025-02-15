@@ -4,7 +4,6 @@ from gestorAplicacion.personas.Doctor import Doctor  # Import Doctor
 from gestorAplicacion.personas.Paciente import Paciente  # Import Paciente
 from gestorAplicacion.administracion.Medicamento import Medicamento  # Import Medicamento
 from gestorAplicacion.administracion.Vacuna import Vacuna  # Import Vacuna
-from gestorAplicacion.administracion.Deserializador import Deserializador  # Import Deserializador
 
 class Hospital:
     habitaciones: List[Habitacion] = []  # Now Habitacion is defined
@@ -14,11 +13,18 @@ class Hospital:
         self.lista_pacientes: List[Paciente] = []
         self.lista_medicamentos: List[Medicamento] = []
         self.lista_vacunas: List[Vacuna] = []
-        Deserializador.deserializar(self)  # Deserializador is now imported
 
-    # Methods remain unchanged (e.g., buscar_tipo_doctor, buscar_paciente, etc.)
+    def buscarPaciente(self, cedula: int) -> Paciente:
+        """
+        Busca un paciente en la lista de pacientes del hospital por su cédula.
+        Retorna el paciente si lo encuentra, o None si no lo encuentra.
+        """
+        for paciente in self.lista_pacientes:
+            if paciente.get_cedula() == cedula:
+                return paciente
+        return None
 
-    # Fix property names (remove "get_" prefix for Python conventions)
+    # ... (rest of the class remains unchanged) ...
     @property
     def lista_doctores(self) -> List[Doctor]:
         return self._lista_doctores

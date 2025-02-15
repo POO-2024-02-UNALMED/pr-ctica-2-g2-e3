@@ -1,15 +1,19 @@
 from gestorAplicacion.personas.Persona import Persona  # Correct import for Persona
-from gestorAplicacion.servicios.Cita import Cita  # Correct import for Cita
 
 class Doctor(Persona):
     def __init__(self, cedula: int, nombre: str, tipo_eps: str, especialidad: str):
         super().__init__(cedula, nombre, tipo_eps)
         self.especialidad = especialidad
         self.agenda = [
-            Cita(self, "3 de Abril, 8:00 am", None),  # Adjust Cita parameters if needed
-            Cita(self, "4 de Abril, 3:00 pm", None),
-            Cita(self, "5 de Abril, 10:00 am", None)
+            self._crear_cita("3 de Abril, 8:00 am", None),  # Use a helper method
+            self._crear_cita("4 de Abril, 3:00 pm", None),
+            self._crear_cita("5 de Abril, 10:00 am", None)
         ]
+
+    def _crear_cita(self, fecha: str, paciente):
+        # Import Cita locally to avoid circular dependency
+        from gestorAplicacion.servicios.Cita import Cita
+        return Cita(self, fecha, paciente)
 
     def actualizar_agenda(self, paciente_asignado, numero_cita, agenda_disponible):
         cita_asignada = None

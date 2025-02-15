@@ -1,13 +1,14 @@
 import sys
 import os
 
-# Corrected path setup (go up two directories from main.py)
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+# 1. Add the project root to sys.path FIRST
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+# 2. Now import other modules
+from typing import List
 from gestorAplicacion.administracion.Hospital import Hospital
-# Added new import statements to mirror the Java main imports
 from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
 from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 from gestorAplicacion.administracion.Medicamento import Medicamento
@@ -18,11 +19,14 @@ from gestorAplicacion.personas.Paciente import Paciente
 from gestorAplicacion.servicios.Cita import Cita
 from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
 from gestorAplicacion.servicios.Formula import Formula
-from gestorAplicacion.servicios.Habitacion import Habitacion
+from gestorAplicacion.servicios.Habitacion import Habitacion  # Moved here
 from gestorAplicacion.servicios.Servicio import Servicio
 
+# Rest of your code remains unchanged
 def mostrar_mensaje_bienvenida():
     print("Bienvenido al Sistema de registro hospitalario basado en objetos")
+
+# ... (rest of your functions and main logic) ...
 
 def mostrar_utilidad_programa():
     print("Utilidades del programa:")

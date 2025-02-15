@@ -1,6 +1,3 @@
-
-#autores: Samuel Botero Rivera, Santiago Sanchez Ruiz, Samuel Gutierrez Betancur, Samuel Garcia Rojas
-
 from gestorAplicacion.personas.Doctor import Doctor  # Correct Doctor import
 from gestorAplicacion.personas.Paciente import Paciente  # Correct Paciente import
 from gestorAplicacion.servicios.Servicio import Servicio  # Correct Servicio import

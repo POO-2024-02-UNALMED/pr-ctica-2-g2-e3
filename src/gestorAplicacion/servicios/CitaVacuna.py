@@ -1,4 +1,4 @@
-from gestorAplicacion.servicios.Cita import Cita
+from gestorAplicacion.servicios.Cita import Cita  # Correct import for Cita
 
 class CitaVacuna(Cita):
     def __init__(self, fecha: str, paciente, vacuna):

@@ -1,16 +1,14 @@
 from gestorAplicacion.personas.Persona import Persona
 from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
-from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
 from gestorAplicacion.administracion.Medicamento import Medicamento
 from gestorAplicacion.personas.Enfermedad import Enfermedad
-from gestorAplicacion.administracion.Hospital import Hospital
 from gestorAplicacion.personas.Doctor import Doctor
-from gestorAplicacion.servicios.Formula import Formula
 from gestorAplicacion.servicios.Habitacion import Habitacion
 from gestorAplicacion.administracion.Vacuna import Vacuna
 
-IVA = 0.19  # Example IVA value
+IVA = 0.19
+
 
 class Paciente(Persona):
     def __init__(self, cedula: int, nombre: str, tipo_eps: str, categoria_habitacion: CategoriaHabitacion = None):
@@ -40,6 +38,7 @@ class Paciente(Persona):
         self.historia_clinica.get_historial_citas().append(cita_asignada)
 
     def calcular_precio_formula(self, formula) -> float:
+        from gestorAplicacion.servicios.Formula import Formula  # Local import
         precio = 0
         for med in formula.get_lista_medicamentos():
             if formula.get_paciente().get_tipo_eps() == "Contributivo":
@@ -70,23 +69,27 @@ class Paciente(Persona):
 
         return precio_total * (1 + IVA)
 
-    def calcular_precio_cita_vacuna(self, cita_asignada: CitaVacuna) -> float:
-        precio_total = cita_asignada.get_vacuna().get_precio()
-        vacuna_tipo = cita_asignada.get_vacuna().get_tipo()
-        if vacuna_tipo == "Obligatoria":
-            precio_total += 1000
-        elif vacuna_tipo == "No obligatoria":
-            precio_total += 3000
+    def calcular_precio_cita_vacuna(self, cita_asignada) -> float:
+        # Import CitaVacuna locally to avoid circular dependency
+        from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
+        if isinstance(cita_asignada, CitaVacuna):
+            precio_total = cita_asignada.get_vacuna().get_precio()
+            vacuna_tipo = cita_asignada.get_vacuna().get_tipo()
+            if vacuna_tipo == "Obligatoria":
+                precio_total += 1000
+            elif vacuna_tipo == "No obligatoria":
+                precio_total += 3000
 
-        tipo_eps = cita_asignada.get_paciente().get_tipo_eps()
-        if tipo_eps == "Contributivo":
-            precio_total += 2000
-        elif tipo_eps == "Subsidiado":
-            precio_total += 500
-        elif tipo_eps == "Particular":
-            precio_total += 10000
+            tipo_eps = cita_asignada.get_paciente().get_tipo_eps()
+            if tipo_eps == "Contributivo":
+                precio_total += 2000
+            elif tipo_eps == "Subsidiado":
+                precio_total += 500
+            elif tipo_eps == "Particular":
+                precio_total += 10000
 
-        return precio_total * (1 + IVA)
+            return precio_total * (1 + IVA)
+        return 0.0
 
     def calcular_precio_habitacion(self, habitacion_asignada) -> float:
         precio = 0
@@ -111,8 +114,11 @@ class Paciente(Persona):
     def mensaje_doctor(self, doctor) -> str:
         return f"{doctor.bienvenida()}\nPor favor selecciona los medicamentos que vas a formularle a: {self.get_nombre()}"
 
-    def actualizar_historial_vacunas(self, cita_asignada: CitaVacuna):
-        self.historia_clinica.get_historial_vacunas().append(cita_asignada)
+    def actualizar_historial_vacunas(self, cita_asignada):
+        # Import CitaVacuna locally to avoid circular dependency
+        from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
+        if isinstance(cita_asignada, CitaVacuna):
+            self.historia_clinica.get_historial_vacunas().append(cita_asignada)
 
     # Getters and setters
     def get_historia_clinica(self):
