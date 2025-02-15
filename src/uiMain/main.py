@@ -224,13 +224,45 @@ def menu_gestion_doctor(hospital: Hospital):
             print("Opción inválida, intente de nuevo.")
 
 def registrar_doctor(hospital: Hospital):
-    nombre = input("Ingrese el nombre del doctor: ")
-    id_doc = input("Ingrese el número de cédula: ")
-    eps = input("Ingrese su tipo de EPS ('Subsidiado','Contributivo' o 'Particular'): ")
-    especialidad = input("Ingrese su especialidad ('General', 'Odontologia' o 'Oftalmologia'): ")
-    # doctor = Doctor(int(id_doc), nombre, eps, especialidad)
-    print("¡El doctor ha sido registrado con éxito! (simulación)")
+    try:
+        # Validar cédula numérica
+        id_doc = int(input("Ingrese el número de cédula: "))
+    except ValueError:
+        print("\nError: La cédula debe ser un número entero.")
+        return
 
+    # Validar EPS
+    eps = input("Ingrese su tipo de EPS ('Subsidiado','Contributivo' o 'Particular'): ").capitalize()
+    if eps not in ["Subsidiado", "Contributivo", "Particular"]:
+        print("\nError: Tipo de EPS no válido.")
+        return
+
+    # Validar especialidad
+    especialidad = input("Ingrese su especialidad ('General', 'Odontologia' o 'Oftalmologia'): ").capitalize()
+    if especialidad not in ["General", "Odontologia", "Oftalmologia"]:
+        print("\nError: Especialidad no válida.")
+        return
+
+    nombre = input("Ingrese el nombre del doctor: ").strip()
+    
+    # Verificar si el doctor ya existe
+    if hospital.buscar_doctor(id_doc):
+        print("\nError: Ya existe un doctor con esta cédula.")
+        return
+    
+    # Crear y registrar el doctor
+    nuevo_doctor = Doctor(
+        cedula=id_doc,
+        nombre=nombre,
+        tipo_eps=eps,
+        especialidad=especialidad
+    )
+    
+    hospital.agregar_doctor(nuevo_doctor)
+    print(f"\n¡Doctor {nombre} registrado exitosamente!")
+    print(f"Especialidad: {especialidad} | EPS: {eps}")
+
+    
 def eliminar_doctor(hospital: Hospital):
     id_doc = input("Ingrese la cédula del doctor que se eliminará: ")
     print("¡Doctor eliminado! (simulación)")

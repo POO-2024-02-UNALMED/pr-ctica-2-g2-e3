@@ -14,6 +14,16 @@ class Hospital:
         self.lista_medicamentos: List[Medicamento] = []
         self.lista_vacunas: List[Vacuna] = []
 
+    def agregar_doctor(self, doctor: Doctor):
+        """Agrega un doctor a la lista de doctores del hospital"""
+        self.lista_doctores.append(doctor)
+
+    def buscar_doctor(self, cedula: int) -> Doctor:
+        """Busca un doctor por cédula en la lista de doctores"""
+        for doctor in self.lista_doctores:
+            if doctor.get_cedula() == cedula:
+                return doctor
+
     def buscarPaciente(self, cedula: int) -> Paciente:
         """
         Busca un paciente en la lista de pacientes del hospital por su cédula.
