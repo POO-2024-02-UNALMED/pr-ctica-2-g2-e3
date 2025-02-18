@@ -394,9 +394,9 @@ def menu_gestion_paciente(hospital: Hospital):
         elif opcion == "2":
             registrar_nueva_enfermedad(hospital)
         elif opcion == "3":
-            print("Paciente eliminado (simulación).")
+            eliminar_paciente(hospital)
         elif opcion == "4":
-            print("Mostrando información del paciente (simulación).")
+            ver_paciente(hospital)
         elif opcion == "5":
             break
         elif opcion == "6":
@@ -407,13 +407,47 @@ def menu_gestion_paciente(hospital: Hospital):
 def registrar_paciente(hospital: Hospital):
     nombre = input("Ingrese el nombre del paciente: ")
     id_paciente = input("Ingrese el número de cédula: ")
-    eps = input("Ingrese su tipo de EPS ('Subsidiado','Contributivo' o 'Particular'): ")
-    # paciente = Paciente(int(id_paciente), nombre, eps)
-    print("Paciente registrado con éxito (simulación).")
+    eps = input("Ingrese su tipo de EPS ('Subsidiado', 'Contributivo' o 'Particular'): ")
+    try:
+        paciente = Paciente(int(id_paciente), nombre, eps)
+        hospital.lista_pacientes.append(paciente)
+        print("Paciente registrado con éxito.")
+    except ValueError:
+        print("Error: El número de cédula debe ser un valor numérico.")
 
 def registrar_nueva_enfermedad(hospital: Hospital):
     id_paciente = input("Ingrese la cédula del paciente para registrar nuevas enfermedades: ")
     print("Nueva enfermedad registrada (simulación).")
+
+def eliminar_paciente(hospital: Hospital):
+    id_paciente = input("Ingrese el número de cédula del paciente a eliminar: ")
+    try:
+        id_int = int(id_paciente)
+        paciente = hospital.buscarPaciente(id_int)
+        if paciente:
+            hospital.lista_pacientes.remove(paciente)
+            print("Paciente eliminado con éxito.")
+        else:
+            print("Paciente no encontrado.")
+    except ValueError:
+        print("Error: La cédula debe ser un valor numérico.")
+
+def ver_paciente(hospital: Hospital):
+    id_paciente = input("Ingrese el número de cédula del paciente a ver: ")
+    try:
+        id_int = int(id_paciente)
+        paciente = hospital.buscarPaciente(id_int)
+        if paciente:
+            print("\nInformación del paciente:")
+            print(paciente)
+        else:
+            print("Paciente no encontrado.")
+    except ValueError:
+        print("Error: La cédula debe ser un valor numérico.")
+
+
+
+
 
 def menu_gestion_vacunas(hospital: Hospital):
     # Implementar las opciones para gestionar vacunas

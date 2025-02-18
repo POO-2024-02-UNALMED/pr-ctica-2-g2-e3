@@ -5,20 +5,26 @@ class Persona:
         self.nombre = nombre
         self.tipo_eps = tipo_eps
 
-    def getCedula(self):
+    @property
+    def cedula(self):
         return self._cedula
 
-    def setCedula(self, value):
+    @cedula.setter
+    def cedula(self, value):
         self._cedula = value
 
-    def getNombre(self):
+    @property
+    def nombre(self):
         return self._nombre
 
-    def setNnombre(self, value):
+    @nombre.setter
+    def nombre(self, value):
         self._nombre = value
 
-    def getTipoEps(self):
+    @property
+    def tipo_eps(self):
         return self._tipo_eps
 
-    def setTipoEps(self, value):
+    @tipo_eps.setter
+    def tipo_eps(self, value):
         self._tipo_eps = value

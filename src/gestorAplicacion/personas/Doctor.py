@@ -25,23 +25,22 @@ class Doctor(Persona):
 
     # Python properties don't need "get_" prefixes. Rename for consistency:
 
-    def getCedula(self):
+    @property
+    def cedula(self):
         return self._cedula
 
-    def getEspecialidad(self) -> str:
+    @property
+    def especialidad(self) -> str:
         return self._especialidad
 
-    def setEspecialidad(self, value: str):
+    @especialidad.setter
+    def especialidad(self, value: str):
         self._especialidad = value
 
-    def getAgenda(self) -> list:
+    @property
+    def agenda(self) -> list:
         return self._agenda
 
-    def setAgenda(self, value: list):
+    @agenda.setter
+    def agenda(self, value: list):
         self._agenda = value
-
-    def bienvenida(self):
-        return f"Hola doctor, {self.nombre}"
-    
-    def __str__(self):
-        return f"Nombre: {self.nombre}\nCédula: {self.cedula}\nTipo de EPS: {self.tipo_eps}\nEspecialidad: {self.especialidad}"

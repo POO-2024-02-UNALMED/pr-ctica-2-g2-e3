@@ -17,6 +17,9 @@ class Paciente(Persona):
         self.habitacion_asignada = None
         self.historia_clinica = HistoriaClinica(self)
     
+    def get_cedula(self):
+        return self._cedula
+
     def med_enfermedad(self, enfermedad, hospital) -> list:
         medicamentos = hospital.medicamentos_disponibles()
         med_enfermedades = []
@@ -70,7 +73,6 @@ class Paciente(Persona):
         return precio_total * (1 + IVA)
 
     def calcular_precio_cita_vacuna(self, cita_asignada) -> float:
-        # Import CitaVacuna locally to avoid circular dependency
         from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
         if isinstance(cita_asignada, CitaVacuna):
             precio_total = cita_asignada.get_vacuna().get_precio()
@@ -115,12 +117,10 @@ class Paciente(Persona):
         return f"{doctor.bienvenida()}\nPor favor selecciona los medicamentos que vas a formularle a: {self.get_nombre()}"
 
     def actualizar_historial_vacunas(self, cita_asignada):
-        # Import CitaVacuna locally to avoid circular dependency
         from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
         if isinstance(cita_asignada, CitaVacuna):
             self.historia_clinica.get_historial_vacunas().append(cita_asignada)
 
-    # Getters and setters
     def get_historia_clinica(self):
         return self.historia_clinica
 
@@ -137,8 +137,8 @@ class Paciente(Persona):
         self.habitacion_asignada = habitacion_asignada
 
     def __str__(self):
-        return (f"---------------------------\nNombre: {self.get_nombre()}\n"
-                f"Cédula: {self.get_cedula()}\nTipo de EPS: {self.get_tipo_eps()}\n"
+        return (f"---------------------------\nNombre: {self.nombre}\n"
+                f"Cédula: {self.cedula}\nTipo de EPS: {self.tipo_eps}\n"
                 "---------------------------")
 
     def despedida(self, cita_asignada) -> str:
