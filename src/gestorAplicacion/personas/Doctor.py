@@ -23,19 +23,22 @@ class Doctor(Persona):
                 cita_asignada = self.agenda[i-1]
         return cita_asignada
 
-    # Python properties don't need "get_" prefixes. Rename for consistency:
-    @property
-    def especialidad(self) -> str:
+    
+    def getEspecialidad(self) -> str:
         return self._especialidad
 
-    @especialidad.setter
-    def especialidad(self, value: str):
+    def setEspecialidad(self, value: str):
         self._especialidad = value
 
-    @property
-    def agenda(self) -> list:
+
+    def getAgenda(self) -> list:
         return self._agenda
 
-    @agenda.setter
-    def agenda(self, value: list):
+    def setAgenda(self, value: list):
         self._agenda = value
+
+    def bienvenida(self):
+        return f"Hola doctor, {self.nombre}"
+    
+    def __str__(self):
+        return f"Nombre: {self.nombre}\nCédula: {self.cedula}\nTipo de EPS: {self.tipo_eps}\nEspecialidad: {self.especialidad}"
