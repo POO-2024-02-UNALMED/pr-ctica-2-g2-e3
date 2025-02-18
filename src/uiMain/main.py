@@ -265,11 +265,52 @@ def registrar_doctor(hospital: Hospital):
     
 def eliminar_doctor(hospital: Hospital):
     id_doc = input("Ingrese la cédula del doctor que se eliminará: ")
-    print("¡Doctor eliminado! (simulación)")
+    try:
+        id_doc = int(id_doc)  # Validar que sea un número
+    except ValueError:
+        print("\nError: La cédula debe ser un número entero.")
+        return
+
+    doctor = hospital.buscar_doctor(id_doc)
+    if doctor:
+        hospital.lista_doctores.remove(doctor)
+        print(f"\n¡Doctor {doctor.nombre} (cédula: {id_doc}) eliminado exitosamente!")
+    else:
+        print("\nError: No existe un doctor con esa cédula.")
 
 def ver_doctor(hospital: Hospital):
-    id_doc = input("Ingrese la cédula del doctor: ")
-    print("Mostrando información del doctor (simulación).")
+    try:
+        id_doc = int(input("Ingrese la cédula del doctor: "))
+    except ValueError:
+        print("Error: La cédula debe ser un número entero.")
+        return
+
+    doctor = hospital.buscar_doctor(id_doc)
+    if doctor is None:
+        while True:
+            print("El doctor no está registrado.\n¿Desea registrarlo?")
+            print("1. Si")
+            print("2. No")
+            try:
+                opcion = int(input("Seleccione una opción: "))
+            except ValueError:
+                print("Opción inválida.")
+                continue
+
+            if opcion == 1:
+                registrar_doctor(hospital)
+                return
+            elif opcion == 2:
+                print("Adios")
+                return
+            else:
+                print("Opción Inválida, por favor intente de nuevo.")
+    else:
+        # Mostrar información del doctor
+        print("Información del doctor:")
+        print(f"Nombre: {doctor.nombre}")
+        print(f"Cédula: {doctor.cedula}")
+        print(f"Especialidad: {doctor.especialidad}")
 
 def agregar_citas(hospital: Hospital):
     id_doc = input("Ingrese la cédula del doctor: ")

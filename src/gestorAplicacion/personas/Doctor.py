@@ -24,6 +24,11 @@ class Doctor(Persona):
         return cita_asignada
 
     # Python properties don't need "get_" prefixes. Rename for consistency:
+
+    @property
+    def cedula(self):
+        return self._cedula
+
     @property
     def especialidad(self) -> str:
         return self._especialidad
