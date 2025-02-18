@@ -23,13 +23,16 @@ class Doctor(Persona):
                 cita_asignada = self.agenda[i-1]
         return cita_asignada
 
-    
+    # Python properties don't need "get_" prefixes. Rename for consistency:
+
+    def getCedula(self):
+        return self._cedula
+
     def getEspecialidad(self) -> str:
         return self._especialidad
 
     def setEspecialidad(self, value: str):
         self._especialidad = value
-
 
     def getAgenda(self) -> list:
         return self._agenda

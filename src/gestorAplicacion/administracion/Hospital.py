@@ -21,7 +21,7 @@ class Hospital:
     def buscar_doctor(self, cedula: int) -> Doctor:
         """Busca un doctor por cédula en la lista de doctores"""
         for doctor in self.lista_doctores:
-            if doctor.get_cedula() == cedula:
+            if doctor.cedula == cedula:
                 return doctor
 
     def buscarPaciente(self, cedula: int) -> Paciente:

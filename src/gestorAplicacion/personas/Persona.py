@@ -1,6 +1,7 @@
 class Persona:
-    def __init__(self, cedula, nombre, tipo_eps):
-        self.cedula = cedula
+    def __init__(self, cedula: int, nombre: str, tipo_eps: str):
+        # Asignar directamente al atributo interno para evitar usar el setter de la propiedad
+        self._cedula = cedula
         self.nombre = nombre
         self.tipo_eps = tipo_eps
 
