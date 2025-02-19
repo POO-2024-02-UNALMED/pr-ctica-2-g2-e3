@@ -22,11 +22,11 @@ from gestorAplicacion.servicios.Formula import Formula
 from gestorAplicacion.servicios.Habitacion import Habitacion  # Moved here
 from gestorAplicacion.servicios.Servicio import Servicio
 
-# Rest of your code remains unchanged
+from baseDatos.deserializador import cargar_todo
+from baseDatos.serializador import guardar_todo
+
 def mostrar_mensaje_bienvenida():
     print("Bienvenido al Sistema de registro hospitalario basado en objetos")
-
-# ... (rest of your functions and main logic) ...
 
 def mostrar_utilidad_programa():
     print("Utilidades del programa:")
@@ -35,6 +35,10 @@ def mostrar_utilidad_programa():
     print("- Registro y manejo de citas médicas y de vacunación.")
     print("- Generación de facturas y control de pagos.")
     print("- Manejo de inventario de medicamentos y vacunas.")
+
+def exit_program(hospital: Hospital):
+    guardar_todo(hospital)
+    sys.exit(0)
 
 def menu_inicial(hospital: Hospital):
     while True:
@@ -48,8 +52,7 @@ def menu_inicial(hospital: Hospital):
         elif opcion == "2":
             menu_gestion(hospital)
         elif opcion == "3":
-            # Aquí se podría serializar el hospital antes de salir.
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida, intente de nuevo.")
 
@@ -77,7 +80,7 @@ def menu_funcionalidades(hospital: Hospital):
         elif opcion == "6":
             break
         elif opcion == "7":
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida, intente de nuevo.")
 
@@ -102,7 +105,7 @@ def menu_gestion(hospital: Hospital):
         elif opcion == "5":
             break
         elif opcion == "6":
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida, intente de nuevo.")
 
@@ -113,7 +116,7 @@ def agendar_citas(hospital: Hospital):
     except ValueError:
         print("Entrada inválida.")
         return
-    paciente = hospital.buscarPaciente(cedula)  # Asume método similar a Java
+    paciente = hospital.buscarPaciente(cedula)
     if not paciente:
         print("Paciente no encontrado. Por favor regístrese.")
         return
@@ -135,8 +138,7 @@ def agendar_citas(hospital: Hospital):
             print("Opción inválida, intente de nuevo.")
             continue
         if tipo_cita == 4:
-            return  # Regresa al menú
-        # Simulación: supongamos que solo en 'General' hay doctores disponibles
+            return
         if tipo_cita == 1:
             doctores_disponibles = ["Doctor A", "Doctor B"]
         else:
@@ -154,12 +156,11 @@ def agendar_citas(hospital: Hospital):
             print("Opción inválida.")
             continue
         if numero_doctor == len(doctores_disponibles) + 1:
-            return  # Regresa al menú
+            return
         if numero_doctor < 1 or numero_doctor > len(doctores_disponibles):
             print("Opción inválida, intente de nuevo.")
             continue
         doctor_seleccionado = doctores_disponibles[numero_doctor - 1]
-        # Simulación: asignamos citas disponibles solo si se selecciona "Doctor A"
         if doctor_seleccionado == "Doctor A":
             agenda_disponible = ["2023-10-01 10:00", "2023-10-01 11:00"]
         else:
@@ -181,7 +182,6 @@ def agendar_citas(hospital: Hospital):
 
 def formula_medica(hospital: Hospital):
     cedula = input("Ingrese la cédula del paciente: ")
-    # paciente = hospital.buscarPaciente(int(cedula))
     print("Funcionalidad de fórmula médica no implementada.")
 
 def asignar_habitacion(hospital: Hospital):
@@ -219,25 +219,22 @@ def menu_gestion_doctor(hospital: Hospital):
         elif opcion == "6":
             break
         elif opcion == "7":
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida, intente de nuevo.")
 
 def registrar_doctor(hospital: Hospital):
     try:
-        # Validar cédula numérica
         id_doc = int(input("Ingrese el número de cédula: "))
     except ValueError:
         print("\nError: La cédula debe ser un número entero.")
         return
 
-    # Validar EPS
     eps = input("Ingrese su tipo de EPS ('Subsidiado','Contributivo' o 'Particular'): ").capitalize()
     if eps not in ["Subsidiado", "Contributivo", "Particular"]:
         print("\nError: Tipo de EPS no válido.")
         return
 
-    # Validar especialidad
     especialidad = input("Ingrese su especialidad ('General', 'Odontologia' o 'Oftalmologia'): ").capitalize()
     if especialidad not in ["General", "Odontologia", "Oftalmologia"]:
         print("\nError: Especialidad no válida.")
@@ -245,12 +242,10 @@ def registrar_doctor(hospital: Hospital):
 
     nombre = input("Ingrese el nombre del doctor: ").strip()
     
-    # Verificar si el doctor ya existe
     if hospital.buscar_doctor(id_doc):
         print("\nError: Ya existe un doctor con esta cédula.")
         return
     
-    # Crear y registrar el doctor
     nuevo_doctor = Doctor(
         cedula=id_doc,
         nombre=nombre,
@@ -262,11 +257,10 @@ def registrar_doctor(hospital: Hospital):
     print(f"\n¡Doctor {nombre} registrado exitosamente!")
     print(f"Especialidad: {especialidad} | EPS: {eps}")
 
-    
 def eliminar_doctor(hospital: Hospital):
     id_doc = input("Ingrese la cédula del doctor que se eliminará: ")
     try:
-        id_doc = int(id_doc)  # Validar que sea un número
+        id_doc = int(id_doc)
     except ValueError:
         print("\nError: La cédula debe ser un número entero.")
         return
@@ -306,7 +300,6 @@ def ver_doctor(hospital: Hospital):
             else:
                 print("Opción Inválida, por favor intente de nuevo.")
     else:
-        # Mostrar información del doctor
         print("Información del doctor:")
         print(f"Nombre: {doctor.nombre}")
         print(f"Cédula: {doctor.cedula}")
@@ -351,8 +344,7 @@ def menu_gestion_hospital(hospital: Hospital):
         elif opcion == "8":
             break
         elif opcion == "9":
-            import sys
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida, intente de nuevo.")
 
@@ -387,7 +379,6 @@ def construir_habitacion(hospital: Hospital):
 
     from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
     try:
-        # Usar la sintaxis de enum para obtener el miembro correspondiente
         categoria = CategoriaHabitacion[categoria_input]
     except KeyError:
         print(f"'{categoria_input}' no es una categoría válida.")
@@ -403,7 +394,6 @@ def ver_habitacion(hospital: Hospital):
     if habitaciones:
         print("Listado de habitaciones creadas:")
         for habitacion in habitaciones:
-            # Se muestra el atributo 'nombre' de la categoría si existe, o la categoría directamente
             categoria = habitacion.categoria.nombre if hasattr(habitacion.categoria, "nombre") else habitacion.categoria
             print(f"- Número: {habitacion.numero}, Categoría: {categoria}, Ocupada: {habitacion.ocupada}")
     else:
@@ -454,7 +444,6 @@ def agregar_medicamentos(hospital: Hospital):
     else:
         tipologia = tipologia_mapping[opcion]
 
-    # Asumimos que la especialidad de la enfermedad es la misma que la tipología seleccionada.
     from gestorAplicacion.personas.Enfermedad import Enfermedad
     nueva_enfermedad = Enfermedad(tipologia, enfermedad_nombre, tipologia)
 
@@ -515,7 +504,7 @@ def menu_gestion_paciente(hospital: Hospital):
         elif opcion == "5":
             break
         elif opcion == "6":
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida, intente de nuevo.")
 
@@ -560,7 +549,6 @@ def registrar_nueva_enfermedad(hospital: Hospital):
     tipologia = tipologia_mapping[opcion]
 
     from gestorAplicacion.personas.Enfermedad import Enfermedad
-    # Asumimos que la especialidad de la enfermedad es la misma que la tipología seleccionada.
     nueva_enfermedad = Enfermedad(tipologia, enfermedad_nombre, tipologia)
 
     if not hasattr(paciente, "historia_clinica") or paciente.historia_clinica is None:
@@ -599,10 +587,6 @@ def ver_paciente(hospital: Hospital):
     except ValueError:
         print("Error: La cédula debe ser un valor numérico.")
 
-
-
-
-
 def menu_gestion_vacunas(hospital: Hospital):
     while True:
         print("\nMENU Gestión Vacunas")
@@ -627,11 +611,9 @@ def menu_gestion_vacunas(hospital: Hospital):
         elif opcion == "6":
             break
         elif opcion == "7":
-            import sys
-            sys.exit(0)
+            exit_program(hospital)
         else:
             print("Opción inválida. Intente de nuevo.")
-
 
 def registrar_vacuna(hospital: Hospital):
     print("\nRegistrar Vacuna")
@@ -642,7 +624,7 @@ def registrar_vacuna(hospital: Hospital):
     tipo = input("Ingrese el tipo de vacuna (Obligatoria/No obligatoria): ")
     
     tipo_eps = []
-    valid_eps = ["Subsidiado", "Contributivo", "Particular"]  # Opciones válidas de EPS
+    valid_eps = ["Subsidiado", "Contributivo", "Particular"]
     while True:
         print("Opciones EPS: " + ", ".join(valid_eps))
         eps = input("Ingrese su tipo de EPS ('Subsidiado','Contributivo' o 'Particular') (o 'fin' para terminar): ")
@@ -680,7 +662,6 @@ def eliminar_vacuna(hospital: Hospital):
         hospital.lista_vacunas.remove(vacuna)
         print("¡Vacuna eliminada!")
 
-
 def ver_vacuna(hospital: Hospital):
     print("\nVer Información de Vacuna")
     nombre = input("Ingrese el nombre de la vacuna: ")
@@ -697,7 +678,6 @@ def ver_vacuna(hospital: Hospital):
         print("Agenda de citas:")
         if vacuna.agenda:
             for cita in vacuna.agenda:
-                # Se usa el atributo 'paciente' en lugar de get_paciente()
                 estado = "(Disponible)" if cita.paciente is None else "(Asignada)"
                 print(f"- {cita.get_fecha()} {estado}")
         else:
@@ -711,11 +691,9 @@ def agregar_cita_vacuna(hospital: Hospital):
         print("Esta vacuna no existe en el inventario del hospital.")
         return
     nueva_fecha = input("Ingrese la fecha para la nueva cita (Ej: '6 de Marzo, 9:00 am'): ")
-    # Se asume que la clase CitaVacuna se inicializa como: CitaVacuna(fecha, paciente, vacuna)
     nueva_cita = CitaVacuna(nueva_fecha, None, vacuna)
     vacuna.agenda.append(nueva_cita)
     print("Nueva cita agregada con éxito a la vacuna.")
-
 
 def eliminar_cita_vacuna(hospital: Hospital):
     print("\nEliminar Cita de Vacuna")
@@ -724,7 +702,6 @@ def eliminar_cita_vacuna(hospital: Hospital):
     if vacuna is None:
         print("Esta vacuna no existe en el inventario del hospital.")
         return
-    # Utilizamos el método de la clase Vacuna para obtener las citas disponibles.
     citas_disponibles = vacuna.mostrar_agenda_disponible()
     if not citas_disponibles:
         print("No hay citas disponibles para eliminar en esta vacuna.")
@@ -743,25 +720,9 @@ def eliminar_cita_vacuna(hospital: Hospital):
     except ValueError:
         print("Entrada inválida.")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def main():
     hospital = Hospital()  # Instanciar hospital
+    cargar_todo(hospital)  # Cargar datos persistidos, si existen
     mostrar_mensaje_bienvenida()
     mostrar_utilidad_programa()
     menu_inicial(hospital)
