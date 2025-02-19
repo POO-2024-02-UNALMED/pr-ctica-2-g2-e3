@@ -50,4 +50,4 @@ class Medicamento:
         self.precio = precio
     
     def __str__(self) -> str:
-        return f"Nombre: {self.nombre}, Enfermedad: {self.enfermedad.get_nombre()} {self.enfermedad.get_tipologia()}, Descripcion: {self.descripcion}"
+        return f"Nombre: {self.nombre}, Enfermedad: {self.enfermedad.nombre} {self.enfermedad.tipologia}, Descripcion: {self.descripcion}"

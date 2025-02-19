@@ -427,18 +427,37 @@ def destruir_habitacion(hospital: Hospital):
         print("No se encontró la habitación.")
 
 def agregar_medicamentos(hospital: Hospital):
-    nombre = input("Ingrese el nombre del medicamento: ")
-    descripcion = input("Ingrese la descripción del medicamento: ")
+    nombre = input("Ingrese el nombre del medicamento: ").strip()
+    descripcion = input("Ingrese la descripción del medicamento: ").strip()
     try:
         cantidad = int(input("Ingrese la cantidad disponible: "))
         precio = float(input("Ingrese el precio del medicamento: "))
     except ValueError:
         print("Cantidad o precio inválido.")
         return
-    # Simulación: se pide el nombre de la enfermedad asociada y se crea una instancia simple.
-    enfermedad_nombre = input("Ingrese el nombre de la enfermedad asociada: ")
+
+    enfermedad_nombre = input("Ingrese el nombre de la enfermedad asociada: ").strip()
+
+    print("Seleccione la tipología de la enfermedad asociada:")
+    print("1. General")
+    print("2. Odontologia")
+    print("3. Oftalmologia")
+    opcion = input("Seleccione una opción: ").strip()
+    tipologia_mapping = {
+        "1": "General",
+        "2": "Odontologia",
+        "3": "Oftalmologia"
+    }
+    if opcion not in tipologia_mapping:
+        print("Opción inválida, se asignará 'General' por defecto.")
+        tipologia = "General"
+    else:
+        tipologia = tipologia_mapping[opcion]
+
+    # Asumimos que la especialidad de la enfermedad es la misma que la tipología seleccionada.
     from gestorAplicacion.personas.Enfermedad import Enfermedad
-    nueva_enfermedad = Enfermedad(enfermedad_nombre, "")
+    nueva_enfermedad = Enfermedad(tipologia, enfermedad_nombre, tipologia)
+
     from gestorAplicacion.administracion.Medicamento import Medicamento
     nuevo_medicamento = Medicamento(nombre, nueva_enfermedad, descripcion, cantidad, precio)
     hospital.lista_medicamentos.append(nuevo_medicamento)
@@ -447,8 +466,8 @@ def agregar_medicamentos(hospital: Hospital):
 def ver_medicamentos(hospital: Hospital):
     if hospital.lista_medicamentos:
         print("Inventario de medicamentos:")
-        for med in hospital.lista_medicamentos:
-            print(med)
+        for medicamento in hospital.lista_medicamentos:
+            print(medicamento)
     else:
         print("No hay medicamentos registrados.")
 
@@ -512,8 +531,47 @@ def registrar_paciente(hospital: Hospital):
         print("Error: El número de cédula debe ser un valor numérico.")
 
 def registrar_nueva_enfermedad(hospital: Hospital):
-    id_paciente = input("Ingrese la cédula del paciente para registrar nuevas enfermedades: ")
-    print("Nueva enfermedad registrada (simulación).")
+    try:
+        cedula = int(input("Ingrese la cédula del paciente para registrar nuevas enfermedades: "))
+    except ValueError:
+        print("Error: La cédula debe ser un número entero.")
+        return
+
+    paciente = hospital.buscarPaciente(cedula)
+    if paciente is None:
+        print("Error: Paciente no encontrado.")
+        return
+
+    enfermedad_nombre = input("Ingrese el nombre de la nueva enfermedad: ").strip()
+    
+    print("Seleccione la tipología de la enfermedad:")
+    print("1. General")
+    print("2. Odontologia")
+    print("3. Oftalmologia")
+    opcion = input("Seleccione una opción: ").strip()
+    tipologia_mapping = {
+        "1": "General",
+        "2": "Odontologia",
+        "3": "Oftalmologia"
+    }
+    if opcion not in tipologia_mapping:
+        print("Opción inválida, operación cancelada.")
+        return
+    tipologia = tipologia_mapping[opcion]
+
+    from gestorAplicacion.personas.Enfermedad import Enfermedad
+    # Asumimos que la especialidad de la enfermedad es la misma que la tipología seleccionada.
+    nueva_enfermedad = Enfermedad(tipologia, enfermedad_nombre, tipologia)
+
+    if not hasattr(paciente, "historia_clinica") or paciente.historia_clinica is None:
+        from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
+        paciente.historia_clinica = HistoriaClinica(paciente)
+
+    if not hasattr(paciente.historia_clinica, "enfermedades") or paciente.historia_clinica.enfermedades is None:
+        paciente.historia_clinica.enfermedades = []
+
+    paciente.historia_clinica.enfermedades.append(nueva_enfermedad)
+    print("Nueva enfermedad registrada exitosamente para el paciente.")
 
 def eliminar_paciente(hospital: Hospital):
     id_paciente = input("Ingrese el número de cédula del paciente a eliminar: ")
