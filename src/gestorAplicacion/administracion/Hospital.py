@@ -34,6 +34,14 @@ class Hospital:
                 return paciente
         return None
 
+
+    def buscar_vacuna(self, nombre: str):
+        for vacuna in self.lista_vacunas:
+            if vacuna.nombre == nombre:
+                return vacuna
+        return None
+    
+    
     # ... (rest of the class remains unchanged) ...
     @property
     def lista_doctores(self) -> List[Doctor]:

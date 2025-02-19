@@ -1,3 +1,4 @@
+
 from gestorAplicacion.personas.Persona import Persona
 from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
@@ -5,7 +6,6 @@ from gestorAplicacion.administracion.Medicamento import Medicamento
 from gestorAplicacion.personas.Enfermedad import Enfermedad
 from gestorAplicacion.personas.Doctor import Doctor
 from gestorAplicacion.servicios.Habitacion import Habitacion
-from gestorAplicacion.administracion.Vacuna import Vacuna
 
 IVA = 0.19
 

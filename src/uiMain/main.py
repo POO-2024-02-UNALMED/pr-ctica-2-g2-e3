@@ -450,8 +450,161 @@ def ver_paciente(hospital: Hospital):
 
 
 def menu_gestion_vacunas(hospital: Hospital):
-    # Implementar las opciones para gestionar vacunas
-    print("Gestión de vacunas no implementada en este esqueleto.")
+    while True:
+        print("\nMENU Gestión Vacunas")
+        print("1. Registrar vacuna")
+        print("2. Eliminar vacuna")
+        print("3. Ver información de una vacuna")
+        print("4. Agregar cita a una vacuna")
+        print("5. Eliminar cita a una vacuna")
+        print("6. Regresar al menú anterior")
+        print("7. Salir")
+        opcion = input("Ingrese una opción: ")
+        if opcion == "1":
+            registrar_vacuna(hospital)
+        elif opcion == "2":
+            eliminar_vacuna(hospital)
+        elif opcion == "3":
+            ver_vacuna(hospital)
+        elif opcion == "4":
+            agregar_cita_vacuna(hospital)
+        elif opcion == "5":
+            eliminar_cita_vacuna(hospital)
+        elif opcion == "6":
+            break
+        elif opcion == "7":
+            import sys
+            sys.exit(0)
+        else:
+            print("Opción inválida. Intente de nuevo.")
+
+
+def registrar_vacuna(hospital: Hospital):
+    print("\nRegistrar Vacuna")
+    nombre = input("Ingrese el nombre de la vacuna (Inicia con mayúscula): ")
+    if hospital.buscar_vacuna(nombre):
+        print("Esta vacuna ya está registrada.")
+        return
+    tipo = input("Ingrese el tipo de vacuna (Obligatoria/No obligatoria): ")
+    
+    tipo_eps = []
+    valid_eps = ["Subsidiado", "Contributivo", "Particular"]  # Opciones válidas de EPS
+    while True:
+        print("Opciones EPS: " + ", ".join(valid_eps))
+        eps = input("Ingrese su tipo de EPS ('Subsidiado','Contributivo' o 'Particular') (o 'fin' para terminar): ")
+        if eps.lower() == 'fin':
+            break
+        if eps not in valid_eps:
+            print("Opción EPS inválida. Por favor, ingrese una de las opciones: " + ", ".join(valid_eps))
+            continue
+        tipo_eps.append(eps)
+    
+    try:
+        precio = float(input("Ingrese el precio de la vacuna: "))
+    except ValueError:
+        print("Precio inválido.")
+        return
+    
+    vacuna_nueva = Vacuna(tipo, nombre, tipo_eps, precio)
+    hospital.lista_vacunas.append(vacuna_nueva)
+    
+    print("\nInformación de la nueva vacuna registrada:")
+    print(f"Vacuna: {vacuna_nueva.nombre}")
+    print(f"Tipo: {vacuna_nueva.tipo}")
+    print(f"Precio: {vacuna_nueva.precio}")
+    print("EPS disponibles:")
+    for eps in vacuna_nueva.tipo_eps:
+        print(f"- {eps}")
+
+def eliminar_vacuna(hospital: Hospital):
+    print("\nEliminar Vacuna")
+    nombre = input("Ingrese el nombre de la vacuna que desea eliminar: ")
+    vacuna = hospital.buscar_vacuna(nombre)
+    if vacuna is None:
+        print("Esta vacuna no existe en el inventario del hospital.")
+    else:
+        hospital.lista_vacunas.remove(vacuna)
+        print("¡Vacuna eliminada!")
+
+
+def ver_vacuna(hospital: Hospital):
+    print("\nVer Información de Vacuna")
+    nombre = input("Ingrese el nombre de la vacuna: ")
+    vacuna = hospital.buscar_vacuna(nombre)
+    if vacuna is None:
+        print("Esta vacuna no existe en el inventario del hospital.")
+    else:
+        print(f"\nNombre: {vacuna.nombre}")
+        print(f"Tipo: {vacuna.tipo}")
+        print(f"Precio: {vacuna.precio}")
+        print("EPS disponibles:")
+        for eps in vacuna.tipo_eps:
+            print(f"- {eps}")
+        print("Agenda de citas:")
+        if vacuna.agenda:
+            for cita in vacuna.agenda:
+                # Se usa el atributo 'paciente' en lugar de get_paciente()
+                estado = "(Disponible)" if cita.paciente is None else "(Asignada)"
+                print(f"- {cita.get_fecha()} {estado}")
+        else:
+            print("No hay citas registradas.")
+
+def agregar_cita_vacuna(hospital: Hospital):
+    print("\nAgregar Cita a Vacuna")
+    nombre = input("Ingrese el nombre de la vacuna: ")
+    vacuna = hospital.buscar_vacuna(nombre)
+    if vacuna is None:
+        print("Esta vacuna no existe en el inventario del hospital.")
+        return
+    nueva_fecha = input("Ingrese la fecha para la nueva cita (Ej: '6 de Marzo, 9:00 am'): ")
+    # Se asume que la clase CitaVacuna se inicializa como: CitaVacuna(fecha, paciente, vacuna)
+    nueva_cita = CitaVacuna(nueva_fecha, None, vacuna)
+    vacuna.agenda.append(nueva_cita)
+    print("Nueva cita agregada con éxito a la vacuna.")
+
+
+def eliminar_cita_vacuna(hospital: Hospital):
+    print("\nEliminar Cita de Vacuna")
+    nombre = input("Ingrese el nombre de la vacuna: ")
+    vacuna = hospital.buscar_vacuna(nombre)
+    if vacuna is None:
+        print("Esta vacuna no existe en el inventario del hospital.")
+        return
+    # Utilizamos el método de la clase Vacuna para obtener las citas disponibles.
+    citas_disponibles = vacuna.mostrar_agenda_disponible()
+    if not citas_disponibles:
+        print("No hay citas disponibles para eliminar en esta vacuna.")
+        return
+    print("Citas disponibles:")
+    for idx, cita in enumerate(citas_disponibles, start=1):
+        print(f"{idx}. {cita.get_fecha()}")
+    try:
+        opcion = int(input("Seleccione la cita que desea eliminar: "))
+        if opcion < 1 or opcion > len(citas_disponibles):
+            print("Opción inválida.")
+            return
+        cita_a_eliminar = citas_disponibles[opcion - 1]
+        vacuna.agenda.remove(cita_a_eliminar)
+        print("¡Cita eliminada con éxito!")
+    except ValueError:
+        print("Entrada inválida.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def main():
     hospital = Hospital()  # Instanciar hospital
