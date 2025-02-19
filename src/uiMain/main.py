@@ -337,11 +337,11 @@ def menu_gestion_hospital(hospital: Hospital):
         if opcion == "1":
             construir_habitacion(hospital)
         elif opcion == "2":
-            print("Mostrando lista de habitaciones (simulación).")
+            ver_habitacion(hospital)
         elif opcion == "3":
             destruir_habitacion(hospital)
         elif opcion == "4":
-            print("Agregando medicamentos (simulación).")
+            agregar_medicamentos(hospital)
         elif opcion == "5":
             ver_medicamentos(hospital)
         elif opcion == "6":
@@ -351,33 +351,129 @@ def menu_gestion_hospital(hospital: Hospital):
         elif opcion == "8":
             break
         elif opcion == "9":
+            import sys
             sys.exit(0)
         else:
             print("Opción inválida, intente de nuevo.")
 
 def construir_habitacion(hospital: Hospital):
-    numero = input("Ingrese el número de la habitación: ")
-    print("Nueva habitación construida (simulación).")
+    try:
+        numero = int(input("Ingrese el número de la habitación: "))
+    except ValueError:
+        print("Número inválido.")
+        return
+
+    print("Elija el tipo de habitación que desea construir")
+    print("1. CAMILLA")
+    print("2. INDIVIDUAL")
+    print("3. DOBLE")
+    print("4. OBSERVACION")
+    print("5. UCI")
+    print("6. UCC")
+    opcion = input("Ingrese una opción: ")
+
+    opciones = {
+        "1": "CAMILLA",
+        "2": "INDIVIDUAL",
+        "3": "DOBLE",
+        "4": "OBSERVACION",
+        "5": "UCI",
+        "6": "UCC"
+    }
+    categoria_input = opciones.get(opcion)
+    if categoria_input is None:
+        print("Opción inválida.")
+        return
+
+    from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
+    try:
+        # Usar la sintaxis de enum para obtener el miembro correspondiente
+        categoria = CategoriaHabitacion[categoria_input]
+    except KeyError:
+        print(f"'{categoria_input}' no es una categoría válida.")
+        return
+
+    from gestorAplicacion.servicios.Habitacion import Habitacion
+    nueva_habitacion = Habitacion(numero, categoria, False, None, 0)
+    Hospital.habitaciones.append(nueva_habitacion)
+    print(f"Habitación número {numero} con categoría {categoria_input} construida con éxito.")
 
 def ver_habitacion(hospital: Hospital):
-    categoria = input("Ingrese el tipo de habitacion que desea ver: ")
-    print("Mostrando habitaciones (simulación).")
-
+    habitaciones = Hospital.habitaciones
+    if habitaciones:
+        print("Listado de habitaciones creadas:")
+        for habitacion in habitaciones:
+            # Se muestra el atributo 'nombre' de la categoría si existe, o la categoría directamente
+            categoria = habitacion.categoria.nombre if hasattr(habitacion.categoria, "nombre") else habitacion.categoria
+            print(f"- Número: {habitacion.numero}, Categoría: {categoria}, Ocupada: {habitacion.ocupada}")
+    else:
+        print("No se han creado habitaciones.")
+        
 def destruir_habitacion(hospital: Hospital):
-    numero = input("Ingrese el número de la habitación a destruir: ")
-    print("Habitación destruida (simulación).")
+    try:
+        numero = int(input("Ingrese el número de la habitación a destruir: "))
+    except ValueError:
+        print("Número inválido.")
+        return
+    habitacion_a_destruir = None
+    for habitacion in Hospital.habitaciones:
+        if habitacion.numero == numero:
+            habitacion_a_destruir = habitacion
+            break
+    if habitacion_a_destruir:
+        Hospital.habitaciones.remove(habitacion_a_destruir)
+        print(f"Habitación número {numero} destruida con éxito.")
+    else:
+        print("No se encontró la habitación.")
 
 def agregar_medicamentos(hospital: Hospital):
-    print("¡Los medicamentos han sido actualizados/creados con éxito! (simulación).")
+    nombre = input("Ingrese el nombre del medicamento: ")
+    descripcion = input("Ingrese la descripción del medicamento: ")
+    try:
+        cantidad = int(input("Ingrese la cantidad disponible: "))
+        precio = float(input("Ingrese el precio del medicamento: "))
+    except ValueError:
+        print("Cantidad o precio inválido.")
+        return
+    # Simulación: se pide el nombre de la enfermedad asociada y se crea una instancia simple.
+    enfermedad_nombre = input("Ingrese el nombre de la enfermedad asociada: ")
+    from gestorAplicacion.personas.Enfermedad import Enfermedad
+    nueva_enfermedad = Enfermedad(enfermedad_nombre, "")
+    from gestorAplicacion.administracion.Medicamento import Medicamento
+    nuevo_medicamento = Medicamento(nombre, nueva_enfermedad, descripcion, cantidad, precio)
+    hospital.lista_medicamentos.append(nuevo_medicamento)
+    print("¡Medicamento agregado con éxito!")
 
 def ver_medicamentos(hospital: Hospital):
-    print("Inventario de medicamentos (simulación).")
+    if hospital.lista_medicamentos:
+        print("Inventario de medicamentos:")
+        for med in hospital.lista_medicamentos:
+            print(med)
+    else:
+        print("No hay medicamentos registrados.")
 
 def ver_personas_registradas(hospital: Hospital):
-    print("Mostrando listado de doctores y pacientes (simulación).")
+    print("Listado de Doctores:")
+    if hospital.lista_doctores:
+        for doctor in hospital.lista_doctores:
+            print(doctor)
+    else:
+        print("No hay doctores registrados.")
+    print("\nListado de Pacientes:")
+    if hospital.lista_pacientes:
+        for paciente in hospital.lista_pacientes:
+            print(paciente)
+    else:
+        print("No hay pacientes registrados.")
 
 def ver_vacunas(hospital: Hospital):
-    print("Mostrando vacunas registradas (simulación).")
+    if hospital.lista_vacunas:
+        print("Vacunas registradas:")
+        for vacuna in hospital.lista_vacunas:
+            print(f"- Nombre: {vacuna.nombre}, Tipo: {vacuna.tipo}, Precio: {vacuna.precio}")
+            print("  EPS disponibles: " + ", ".join(vacuna.tipo_eps))
+    else:
+        print("No hay vacunas registradas.")
 
 def menu_gestion_paciente(hospital: Hospital):
     while True:

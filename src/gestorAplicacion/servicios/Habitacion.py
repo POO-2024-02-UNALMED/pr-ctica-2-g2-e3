@@ -24,3 +24,9 @@ class Habitacion(Servicio):
             for habitacion in Hospital.habitaciones 
             if habitacion.categoria == categoria and not habitacion.ocupada
         ]
+        
+    # Implementar el método abstracto para validar el pago
+    def validarPago(self, paciente, id_servicio: int):
+        # Implementación genérica para validar pago en una habitación
+        # Se podría realizar el cálculo basado en la categoría y días, u otra lógica
+        return True
