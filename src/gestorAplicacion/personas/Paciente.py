@@ -21,13 +21,18 @@ class Paciente(Persona):
         return self._cedula
 
     def med_enfermedad(self, enfermedad, hospital) -> list:
-        medicamentos = hospital.medicamentos_disponibles()
-        med_enfermedades = []
-        for med in medicamentos:
-            if (enfermedad.get_nombre() == med.get_enfermedad().get_nombre() and
-                enfermedad.get_tipologia() == med.get_enfermedad().get_tipologia()):
-                med_enfermedades.append(med)
-        return med_enfermedades
+        """
+        Retorna una lista de medicamentos disponibles para tratar la enfermedad dada.
+        Se filtra la lista de medicamentos del hospital comparando el nombre (o tipología)
+        de la enfermedad asociada al medicamento con la enfermedad proporcionada.
+        """
+        # Se filtra por medicamento que coincida con la enfermedad en nombre y tipología
+        medicamentos = [
+            med for med in hospital.lista_medicamentos
+            if med.enfermedad.nombre == enfermedad.nombre and med.enfermedad.tipologia == enfermedad.tipologia
+            and med.cantidad > 0  # opcional: solo los que hay en stock
+        ]
+        return medicamentos
 
     def buscar_doctor_eps(self, especialidad: str, hospital) -> list:
         doctores_por_especialidad = hospital.buscar_tipo_doctor(especialidad)
@@ -41,15 +46,28 @@ class Paciente(Persona):
         self.historia_clinica.get_historial_citas().append(cita_asignada)
 
     def calcular_precio_formula(self, formula) -> float:
-        from gestorAplicacion.servicios.Formula import Formula  # Local import
+        # Asegurarnos de que la fórmula tenga asignado el paciente
+        if formula.paciente is None:
+            formula.paciente = self
+
+        # Si se asignó la lista de medicamentos usando un nombre erróneo,
+        # se copia su valor a la propiedad correcta.
+        if hasattr(formula, "lista_medicamentos"):
+            formula.listaMedicamentos = formula.lista_medicamentos
+
+        # Verificar que la lista de medicamentos sea del tipo list,
+        # en caso contrario, inicializarla
+        if not isinstance(formula.getListaMedicamentos(), list):
+            formula.listaMedicamentos = []  # Re-inicializamos a lista vacía
+
         precio = 0
-        for med in formula.get_lista_medicamentos():
-            if formula.get_paciente().get_tipo_eps() == "Contributivo":
-                precio += med.get_precio() * 0.8
-            elif formula.get_paciente().get_tipo_eps() == "Subsidiado":
-                precio += med.get_precio() * 0.7
-            elif formula.get_paciente().get_tipo_eps() == "Particular":
-                precio += med.get_precio()
+        for med in formula.getListaMedicamentos():
+            if formula.paciente.tipo_eps == "Contributivo":
+                precio += med.precio * 0.8
+            elif formula.paciente.tipo_eps == "Subsidiado":
+                precio += med.precio * 0.7
+            elif formula.paciente.tipo_eps == "Particular":
+                precio += med.precio
         return precio * (1 + IVA)
 
     def calcular_precio_cita(self, cita_asignada) -> float:

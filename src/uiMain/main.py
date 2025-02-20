@@ -122,6 +122,7 @@ def agendar_citas(hospital: Hospital):
         return
     print(paciente.bienvenida() if hasattr(paciente, "bienvenida") else "Bienvenido, paciente.")
 
+    # Seleccionar el tipo de cita y filtrar doctores por especialidad...
     doctores_disponibles = []
     while not doctores_disponibles:
         print("\nSeleccione el tipo de cita que requiere:")
@@ -148,16 +149,16 @@ def agendar_citas(hospital: Hospital):
         elif tipo_cita == 3:
             especialidad = "Oftalmologia"
         
-        # Obtener doctores registrados que coincidan con la especialidad requerida.
+        # Filtrar doctores de la especialidad elegida.
         doctores_disponibles = [doc for doc in hospital.lista_doctores if doc.especialidad == especialidad]
         if not doctores_disponibles:
             print("No hay doctores disponibles para la especialidad seleccionada.")
 
-    agenda_disponible = []
-    while not agenda_disponible:
+    # Selección del doctor
+    while True:
         print("\nDoctores disponibles:")
         for idx, doc in enumerate(doctores_disponibles, start=1):
-            print(f"{idx}. {doc.nombre}")  # Se muestra el nombre del doctor
+            print(f"{idx}. {doc.nombre}")
         print(f"{len(doctores_disponibles)+1}. --Regresar al menú--")
         try:
             numero_doctor = int(input("Seleccione el doctor con el que quiere la cita: "))
@@ -170,30 +171,154 @@ def agendar_citas(hospital: Hospital):
             print("Opción inválida, intente de nuevo.")
             continue
         doctor_seleccionado = doctores_disponibles[numero_doctor - 1]
-        # Aquí se simula la agenda del doctor. Se debe reemplazar con la lógica real.
-        if doctor_seleccionado.nombre == "Doctor A":
-            agenda_disponible = ["2023-10-01 10:00", "2023-10-01 11:00"]
-        else:
+        # Si el doctor no tiene citas disponibles, se vuelve a pedir selección.
+        agenda_disponible = [cita for cita in doctor_seleccionado.agenda if cita.paciente is None]
+        if not agenda_disponible:
             print("El doctor seleccionado no tiene citas disponibles, intente otro.")
+            continue
+        break
 
-    print("\nCitas disponibles:")
-    for idx, slot in enumerate(agenda_disponible, start=1):
-        print(f"{idx}. {slot}")
+    # Mostrar la agenda completa del doctor
+    print("\nCitas del doctor:")
+    for idx, cita in enumerate(doctor_seleccionado.agenda, start=1):
+        estado = "Disponible" if cita.paciente is None else "Asignada"
+        print(f"{idx}. {cita.fecha} - {estado}")
+
     try:
         numero_cita = int(input("Seleccione la cita de su preferencia: "))
     except ValueError:
         print("Entrada inválida.")
         return
-    if numero_cita < 1 or numero_cita > len(agenda_disponible):
+    if numero_cita < 1 or numero_cita > len(doctor_seleccionado.agenda):
         print("Opción inválida, operación cancelada.")
         return
-    cita_seleccionada = agenda_disponible[numero_cita - 1]
-    print(f"Cita agendada con éxito para {cita_seleccionada} con {doctor_seleccionado.nombre}.")
+    cita_seleccionada = doctor_seleccionado.agenda[numero_cita - 1]
+    if cita_seleccionada.paciente is not None:
+        print("La cita seleccionada ya está asignada. Operación cancelada.")
+        return
 
+    # Asignar la cita al paciente y mostrar la agenda actualizada
+    cita_seleccionada.paciente = paciente
+    print(f"\nCita agendada con éxito para {cita_seleccionada.fecha} con {doctor_seleccionado.nombre}.")
+
+    print("\nAgenda actualizada del doctor:")
+    for idx, cita in enumerate(doctor_seleccionado.agenda, start=1):
+        estado = "Disponible" if cita.paciente is None else "Asignada"
+        print(f"{idx}. {cita.fecha} - {estado}")
 
 def formula_medica(hospital: Hospital):
+    # Solicitar y validar la cédula del paciente
     cedula = input("Ingrese la cédula del paciente: ")
-    print("Funcionalidad de fórmula médica no implementada.")
+    try:
+        cedula = int(cedula)
+    except ValueError:
+        print("Error: La cédula debe ser un número entero.")
+        return
+
+    paciente = hospital.buscarPaciente(cedula)
+    if not paciente:
+        print("Paciente no encontrado. Por favor regístrese primero.")
+        return
+
+    # Verificar que el paciente tenga enfermedades registradas en su historia clínica
+    if not paciente.historia_clinica.enfermedades:
+        print("No hay enfermedades registradas. Diríjase a la opción de registrar enfermedad.")
+        return
+
+    # Listar las enfermedades registradas
+    print("\nEnfermedades registradas:")
+    for idx, enfermedad in enumerate(paciente.historia_clinica.enfermedades, start=1):
+        print(f"{idx}. {enfermedad.nombre} - {enfermedad.tipologia}")
+
+    opcion = input("Elija la enfermedad que desea tratar (ingrese el número correspondiente): ")
+    try:
+        opcion = int(opcion)
+    except ValueError:
+        print("Entrada inválida.")
+        return
+    if opcion < 1 or opcion > len(paciente.historia_clinica.enfermedades):
+        print("Opción fuera de rango.")
+        return
+
+    # Seleccionar la enfermedad a tratar
+    enfermedad_tratar = paciente.historia_clinica.enfermedades[opcion - 1]
+
+    # Buscar doctores con la especialidad que corresponde a la enfermedad.
+    # En lugar de hospital.buscar_tipo_doctor, se utiliza una lista por comprensión.
+    doctores_cita = [doc for doc in hospital.lista_doctores if doc.especialidad == enfermedad_tratar.especialidad]
+    if not doctores_cita:
+        print("Ahora no contamos con doctores para tratar esta enfermedad. Lo sentimos mucho.")
+        return
+
+    print(f"\nDoctor(es) disponibles para formular {enfermedad_tratar.nombre} ({enfermedad_tratar.tipologia}):")
+    for idx, doc in enumerate(doctores_cita, start=1):
+        print(f"{idx}. {doc.nombre}")
+
+    opcion_doc = input("Seleccione el doctor (ingrese el número correspondiente): ")
+    try:
+        opcion_doc = int(opcion_doc)
+    except ValueError:
+        print("Entrada inválida.")
+        return
+    if opcion_doc < 1 or opcion_doc > len(doctores_cita):
+        print("Opción fuera de rango.")
+        return
+    doctor_escogido = doctores_cita[opcion_doc - 1]
+
+    # Crear la fórmula asociada al paciente
+    from gestorAplicacion.servicios.Formula import Formula
+    formula_paciente = Formula(paciente)
+    # Asignar el doctor seleccionado
+    formula_paciente.doctor = doctor_escogido
+
+    # Agregar medicamentos a la fórmula
+    medicamentos_seleccionados = []
+    while True:
+        # Obtener medicamentos disponibles para la enfermedad a través del método 'med_enfermedad' del paciente
+        disponibles = paciente.med_enfermedad(enfermedad_tratar, hospital)
+        if not disponibles:
+            print("No hay medicamentos disponibles para tratar esta enfermedad.")
+            break
+
+        print(f"\nMedicamentos disponibles para tratar {enfermedad_tratar.nombre}:")
+        for idx, med in enumerate(disponibles, start=1):
+            print(f"{idx}. {med.nombre}")
+
+        opcion_med = input("Seleccione el medicamento a agregar (ingrese 0 para terminar): ")
+        try:
+            opcion_med = int(opcion_med)
+        except ValueError:
+            print("Entrada inválida.")
+            continue
+
+        if opcion_med == 0:
+            break
+        if opcion_med < 1 or opcion_med > len(disponibles):
+            print("Opción fuera de rango.")
+            continue
+
+        medicamento_seleccionado = disponibles[opcion_med - 1]
+        # Evitar agregar duplicados (opcional)
+        if medicamento_seleccionado in medicamentos_seleccionados:
+            print("Ya ha seleccionado este medicamento.")
+        else:
+            medicamentos_seleccionados.append(medicamento_seleccionado)
+            print(f"Medicamento '{medicamento_seleccionado.nombre}' agregado.")
+
+    if not medicamentos_seleccionados:
+        print("No se agregaron medicamentos, la fórmula no se guardará.")
+        return
+
+    # Asignar la lista de medicamentos a la fórmula
+    formula_paciente.lista_medicamentos = medicamentos_seleccionados
+    # Agregar la fórmula a la historia clínica del paciente
+    paciente.historia_clinica.lista_formulas.append(formula_paciente)
+
+    # Calcular e imprimir el precio final de la fórmula
+    precio_total = paciente.calcular_precio_formula(formula_paciente)
+    print("\nFÓRMULA MÉDICA GENERADA:")
+    print(formula_paciente)
+    print(f"Precio total de la fórmula: {precio_total}")
 
 def asignar_habitacion(hospital: Hospital):
     cedula = input("Ingrese el número de identificación del paciente: ")
@@ -315,6 +440,15 @@ def ver_doctor(hospital: Hospital):
         print(f"Nombre: {doctor.nombre}")
         print(f"Cédula: {doctor.cedula}")
         print(f"Especialidad: {doctor.especialidad}")
+
+        # Mostrar la agenda del doctor (citas disponibles y asignadas)
+        print("\nAgenda del doctor:")
+        if doctor.agenda:
+            for idx, cita in enumerate(doctor.agenda, start=1):
+                estado = "Disponible" if cita.paciente is None else "Asignada"
+                print(f"{idx}. {cita.fecha} - {estado}")
+        else:
+            print("No tiene citas registradas.")
 
 def agregar_citas(hospital: Hospital):
     try:
