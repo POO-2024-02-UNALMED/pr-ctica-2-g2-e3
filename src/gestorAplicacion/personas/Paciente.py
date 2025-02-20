@@ -137,7 +137,8 @@ class Paciente(Persona):
     def actualizar_historial_vacunas(self, cita_asignada):
         from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
         if isinstance(cita_asignada, CitaVacuna):
-            self.historia_clinica.get_historial_vacunas().append(cita_asignada)
+            # Se utiliza el atributo 'historial_vacunas' directamente sin llamarlo como función.
+            self.historia_clinica.historial_vacunas.append(cita_asignada)
 
     def get_historia_clinica(self):
         return self.historia_clinica

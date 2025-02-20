@@ -379,9 +379,108 @@ def asignar_habitacion(hospital: Hospital):
 
 
 def vacunacion(hospital: Hospital):
-    cedula = input("Ingrese la cédula del paciente: ")
-    print("Funcionalidad de vacunación no implementada.")
+    # Solicitar la cédula del paciente y buscarlo
+    try:
+        cedula = int(input("Ingrese la cédula del paciente: "))
+    except ValueError:
+        print("Cédula inválida.")
+        return
+    paciente = hospital.buscarPaciente(cedula)
+    if paciente is None:
+        print("Paciente no encontrado.")
+        return
 
+    # Mensaje de bienvenida (si el paciente tiene el método 'bienvenida')
+    if hasattr(paciente, "bienvenida"):
+        print(paciente.bienvenida())
+    else:
+        print(f"Bienvenido, {paciente.nombre}")
+
+    # Solicitar el tipo de vacuna a aplicar
+    print("\nSeleccione el tipo de vacuna que requiere:")
+    print("1. Obligatoria")
+    print("2. No obligatoria")
+    try:
+        tipo_vacuna = int(input("Ingrese una opción: "))
+    except ValueError:
+        print("Opción inválida.")
+        return
+    if tipo_vacuna not in [1, 2]:
+        print("Opción fuera de rango.")
+        return
+
+    # Filtrar vacunas disponibles según el tipo (comparando en minúscula)
+    vacunas_disponibles = []
+    for vacuna in hospital.lista_vacunas:
+        if tipo_vacuna == 1 and vacuna.tipo.lower() == "obligatoria":
+            vacunas_disponibles.append(vacuna)
+        elif tipo_vacuna == 2 and vacuna.tipo.lower() == "no obligatoria":
+            vacunas_disponibles.append(vacuna)
+    if not vacunas_disponibles:
+        print("No hay vacunas disponibles para el tipo seleccionado.")
+        return
+
+    print("\nVacunas disponibles:")
+    for idx, vacuna in enumerate(vacunas_disponibles, start=1):
+        print(f"{idx}. {vacuna.nombre} (Tipo: {vacuna.tipo}, Precio: {vacuna.precio})")
+    
+    try:
+        num_vacuna = int(input("Seleccione la vacuna que desea aplicar (ingrese el número): "))
+    except ValueError:
+        print("Opción inválida.")
+        return
+    if num_vacuna < 1 or num_vacuna > len(vacunas_disponibles):
+        print("Selección fuera de rango.")
+        return
+    vacuna_seleccionada = vacunas_disponibles[num_vacuna - 1]
+
+    # Mostrar la agenda disponible para la vacuna seleccionada
+    agenda_disponible = vacuna_seleccionada.mostrar_agenda_disponible()
+    if not agenda_disponible:
+        print("No hay citas disponibles para esta vacuna.")
+        return
+
+    print("\nCitas disponibles para la vacuna:")
+    for idx, cita in enumerate(agenda_disponible, start=1):
+        print(f"{idx}. Fecha: {cita.get_fecha()}")
+
+    try:
+        num_cita = int(input("Seleccione la cita de su preferencia: "))
+    except ValueError:
+        print("Opción inválida.")
+        return
+    if num_cita < 1 or num_cita > len(agenda_disponible):
+        print("Selección fuera de rango.")
+        return
+
+    # Actualizar la agenda: asignar la cita al paciente
+    cita_asignada = vacuna_seleccionada.actualizar_agenda(paciente, num_cita, agenda_disponible)
+    if cita_asignada is None:
+        print("No se pudo asignar la cita.")
+        return
+
+    # Actualizar el historial de vacunas del paciente
+    if hasattr(paciente, "actualizar_historial_vacunas"):
+        paciente.actualizar_historial_vacunas(cita_asignada)
+    else:
+        # Si el paciente no tiene el método, asegurarse de tener un historial (simulación)
+        if not hasattr(paciente, "historia_clinica"):
+            paciente.historia_clinica = type("HistoriaClinica", (), {"historial_vacunas": []})()
+        paciente.historia_clinica.historial_vacunas.append(cita_asignada)
+
+    # Imprimir resumen de la cita asignada
+    print("\nResumen de su cita de vacunación:")
+    print(f"Fecha: {cita_asignada.get_fecha()}")
+    print(f"Paciente: {cita_asignada.paciente.nombre}")
+    print(f"Vacuna: {vacuna_seleccionada.nombre}")
+    print("Asistente médico: Enfermera")
+    
+    # Mostrar historial de vacunas aplicadas (si existe)
+    if hasattr(paciente, "historia_clinica") and hasattr(paciente.historia_clinica, "historial_vacunas"):
+        print("\nHistorial de vacunas aplicadas:")
+        for idx, cv in enumerate(paciente.historia_clinica.historial_vacunas, start=1):
+            print(f"{idx}. Fecha: {cv.get_fecha()}, Vacuna: {cv.vacuna.nombre}")
+    
 def facturacion(hospital: Hospital):
     print("Funcionalidad de facturación no implementada.")
 
