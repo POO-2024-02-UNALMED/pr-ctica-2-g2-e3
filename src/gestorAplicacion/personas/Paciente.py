@@ -89,36 +89,39 @@ class Paciente(Persona):
             precio_total += 10000
 
         return precio_total * (1 + IVA)
-
+    
     def calcular_precio_cita_vacuna(self, cita_asignada) -> float:
-        from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
-        if isinstance(cita_asignada, CitaVacuna):
-            precio_total = cita_asignada.get_vacuna().get_precio()
-            vacuna_tipo = cita_asignada.get_vacuna().get_tipo()
-            if vacuna_tipo == "Obligatoria":
-                precio_total += 1000
-            elif vacuna_tipo == "No obligatoria":
-                precio_total += 3000
+        # Nota: Se deben invocar correctamente los métodos get_vacuna para acceder a sus propiedades.
+        # Es decir, usar paréntesis al llamar a get_vacuna().
+        precio_total = cita_asignada.get_vacuna().get_precio  
+        vacuna_tipo  = cita_asignada.get_vacuna().get_tipo  
 
-            tipo_eps = cita_asignada.get_paciente().get_tipo_eps()
-            if tipo_eps == "Contributivo":
-                precio_total += 2000
-            elif tipo_eps == "Subsidiado":
-                precio_total += 500
-            elif tipo_eps == "Particular":
-                precio_total += 10000
+        if vacuna_tipo.lower() == "obligatoria":
+            precio_total += 1000
+        elif vacuna_tipo.lower() == "no obligatoria":
+            precio_total += 3000
 
-            return precio_total * (1 + IVA)
-        return 0.0
+        # Acceso directo al atributo 'paciente' de la cita
+        tipo_eps = cita_asignada.paciente.tipo_eps  
+        if tipo_eps == "Contributivo":
+            precio_total += 2000
+        elif tipo_eps == "Subsidiado":
+            precio_total += 500
+        elif tipo_eps == "Particular":
+            precio_total += 10000
+
+        IVA = 0.19
+        return precio_total * (1 + IVA)
 
     def calcular_precio_habitacion(self, habitacion_asignada) -> float:
-        precio = 0
-        if self.get_tipo_eps() == "Subsidiado":
-            precio = habitacion_asignada.get_categoria().get_valor() * 0
-        elif self.get_tipo_eps() == "Contributivo":
-            precio = (habitacion_asignada.get_categoria().get_valor() / 2) * habitacion_asignada.get_dias()
+        # Se accede directamente al atributo 'tipo_eps' en lugar de llamar a un método inexistente.
+        if self.tipo_eps == "Subsidiado":
+            precio = habitacion_asignada.categoria.get_valor() * 0
+        elif self.tipo_eps == "Contributivo":
+            precio = (habitacion_asignada.categoria.get_valor() / 2) * habitacion_asignada.dias
         else:  # Particular
-            precio = habitacion_asignada.get_categoria().get_valor() * habitacion_asignada.get_dias()
+            precio = habitacion_asignada.categoria.get_valor() * habitacion_asignada.dias
+        IVA = 0.19
         return precio * (1 + IVA)
 
     def buscar_vacuna_por_eps(self, tipo: str, hospital) -> list:

@@ -482,8 +482,67 @@ def vacunacion(hospital: Hospital):
             print(f"{idx}. Fecha: {cv.get_fecha()}, Vacuna: {cv.vacuna.nombre}")
     
 def facturacion(hospital: Hospital):
-    print("Funcionalidad de facturación no implementada.")
+    # Solicitar la cédula del paciente y buscarlo
+    try:
+        cedula = int(input("Ingrese la cédula del paciente para facturación: "))
+    except ValueError:
+        print("Cédula inválida.")
+        return
 
+    paciente = hospital.buscarPaciente(cedula)
+    if paciente is None:
+        print("Paciente no encontrado.")
+        return
+
+    print(f"\n--- Facturación para {paciente.nombre} ---")
+
+    servicios = []  # Lista de tuplas (descripción, costo)
+    total = 0.0
+
+    # Agregar fórmulas médicas (si existen)
+    if hasattr(paciente, "historia_clinica") and hasattr(paciente.historia_clinica, "lista_formulas"):
+        for formula in paciente.historia_clinica.lista_formulas:
+            costo_formula = paciente.calcular_precio_formula(formula)
+            descripcion = f"FÓRMULA MÉDICA con Dr(a). {formula.doctor.nombre}"
+            servicios.append((descripcion, costo_formula))
+            total += costo_formula
+
+    # Agregar citas de vacunación (si existen)
+    if hasattr(paciente, "historia_clinica") and hasattr(paciente.historia_clinica, "historial_vacunas"):
+        for cita in paciente.historia_clinica.historial_vacunas:
+            costo_vacuna = paciente.calcular_precio_cita_vacuna(cita)
+            descripcion = f"Vacunación - {cita.vacuna.nombre} en fecha {cita.get_fecha()}"
+            servicios.append((descripcion, costo_vacuna))
+            total += costo_vacuna
+
+    # Agregar asignación de habitación (si existe)
+    if hasattr(paciente, "habitacion_asignada") and paciente.habitacion_asignada is not None:
+        costo_habitacion = paciente.calcular_precio_habitacion(paciente.habitacion_asignada)
+        descripcion = (f"Habitación #{paciente.habitacion_asignada.numero} - "
+                       f"{paciente.habitacion_asignada.categoria.name} "
+                       f"por {paciente.habitacion_asignada.dias} día(s)")
+        servicios.append((descripcion, costo_habitacion))
+        total += costo_habitacion
+
+    if not servicios:
+        print("No se encontraron servicios facturables para este paciente.")
+        return
+
+    # Mostrar la factura detallada
+    print("\nServicios facturados:")
+    for idx, (desc, costo) in enumerate(servicios, start=1):
+        print(f"{idx}. {desc} -- Costo: {costo}")
+
+    print(f"\nTotal a pagar: {total}")
+
+    # Opción para pagar
+    opcion_pago = input("¿Desea proceder con el pago? (S/N): ").strip().lower()
+    if opcion_pago == "s":
+        print("Pago realizado con éxito.")
+        # Opcional: Aquí podrías limpiar el historial o marcar la factura como pagada.
+    else:
+        print("Pago cancelado.")
+        
 def menu_gestion_doctor(hospital: Hospital):
     while True:
         print("\nMENU GESTION DOCTOR")
