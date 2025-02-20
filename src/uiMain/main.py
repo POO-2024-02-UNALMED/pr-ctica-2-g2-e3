@@ -139,16 +139,25 @@ def agendar_citas(hospital: Hospital):
             continue
         if tipo_cita == 4:
             return
+
+        especialidad = ""
         if tipo_cita == 1:
-            doctores_disponibles = ["Doctor A", "Doctor B"]
-        else:
+            especialidad = "General"
+        elif tipo_cita == 2:
+            especialidad = "Odontologia"
+        elif tipo_cita == 3:
+            especialidad = "Oftalmologia"
+        
+        # Obtener doctores registrados que coincidan con la especialidad requerida.
+        doctores_disponibles = [doc for doc in hospital.lista_doctores if doc.especialidad == especialidad]
+        if not doctores_disponibles:
             print("No hay doctores disponibles para la especialidad seleccionada.")
-    
+
     agenda_disponible = []
     while not agenda_disponible:
         print("\nDoctores disponibles:")
         for idx, doc in enumerate(doctores_disponibles, start=1):
-            print(f"{idx}. {doc}")
+            print(f"{idx}. {doc.nombre}")  # Se muestra el nombre del doctor
         print(f"{len(doctores_disponibles)+1}. --Regresar al menú--")
         try:
             numero_doctor = int(input("Seleccione el doctor con el que quiere la cita: "))
@@ -161,11 +170,12 @@ def agendar_citas(hospital: Hospital):
             print("Opción inválida, intente de nuevo.")
             continue
         doctor_seleccionado = doctores_disponibles[numero_doctor - 1]
-        if doctor_seleccionado == "Doctor A":
+        # Aquí se simula la agenda del doctor. Se debe reemplazar con la lógica real.
+        if doctor_seleccionado.nombre == "Doctor A":
             agenda_disponible = ["2023-10-01 10:00", "2023-10-01 11:00"]
         else:
             print("El doctor seleccionado no tiene citas disponibles, intente otro.")
-    
+
     print("\nCitas disponibles:")
     for idx, slot in enumerate(agenda_disponible, start=1):
         print(f"{idx}. {slot}")
@@ -178,7 +188,8 @@ def agendar_citas(hospital: Hospital):
         print("Opción inválida, operación cancelada.")
         return
     cita_seleccionada = agenda_disponible[numero_cita - 1]
-    print(f"Cita agendada con éxito para {cita_seleccionada} con {doctor_seleccionado}.")
+    print(f"Cita agendada con éxito para {cita_seleccionada} con {doctor_seleccionado.nombre}.")
+
 
 def formula_medica(hospital: Hospital):
     cedula = input("Ingrese la cédula del paciente: ")
@@ -306,13 +317,59 @@ def ver_doctor(hospital: Hospital):
         print(f"Especialidad: {doctor.especialidad}")
 
 def agregar_citas(hospital: Hospital):
-    id_doc = input("Ingrese la cédula del doctor: ")
-    fecha = input("Ingrese la fecha de la cita: ")
-    print("La cita ha sido agregada a la agenda del doctor (simulación).")
+    try:
+        id_doc = int(input("Ingrese la cédula del doctor: "))
+    except ValueError:
+        print("Cédula inválida.")
+        return
+    doctor = hospital.buscar_doctor(id_doc)
+    if not doctor:
+        print("Doctor no encontrado.")
+        return
+    fecha = input("Ingrese la fecha de la nueva cita (Ej: '10-10-2025 10:00'): ")
+    # Importar Cita para crear la nueva cita
+    from gestorAplicacion.servicios.Cita import Cita
+    nueva_cita = Cita(doctor, fecha, None)
+    doctor.agenda.append(nueva_cita)
+    print("La cita ha sido agregada a la agenda del doctor.")
+    print("Agenda actual:")
+    for idx, cita in enumerate(doctor.agenda, start=1):
+        estado = "Asignada" if cita.paciente else "Disponible"
+        print(f"{idx}. Fecha: {cita.fecha} - {estado}")
 
 def eliminar_citas(hospital: Hospital):
-    id_doc = input("Ingrese la cédula del doctor para eliminar una cita: ")
-    print("¡Cita eliminada con exito! (simulación)")
+    try:
+        id_doc = int(input("Ingrese la cédula del doctor para eliminar una cita: "))
+    except ValueError:
+        print("Cédula inválida.")
+        return
+    doctor = hospital.buscar_doctor(id_doc)
+    if not doctor:
+        print("Doctor no encontrado.")
+        return
+    # Mostrar solo las citas sin asignar (disponibles para eliminar)
+    citas_disponibles = [cita for cita in doctor.agenda if cita.paciente is None]
+    if not citas_disponibles:
+        print("No hay citas disponibles para eliminar (todas están asignadas).")
+        return
+    print("Citas disponibles para eliminar:")
+    for idx, cita in enumerate(citas_disponibles, start=1):
+        print(f"{idx}. Fecha: {cita.fecha}")
+    try:
+        opcion = int(input("Seleccione la cita que desea eliminar: "))
+    except ValueError:
+        print("Opción inválida.")
+        return
+    if opcion < 1 or opcion > len(citas_disponibles):
+        print("Opción fuera de rango.")
+        return
+    cita_a_eliminar = citas_disponibles[opcion - 1]
+    doctor.agenda.remove(cita_a_eliminar)
+    print("¡Cita eliminada con éxito!")
+    print("Agenda actual:")
+    for idx, cita in enumerate(doctor.agenda, start=1):
+        estado = "Asignada" if cita.paciente else "Disponible"
+        print(f"{idx}. Fecha: {cita.fecha} - {estado}")
 
 def menu_gestion_hospital(hospital: Hospital):
     while True:
