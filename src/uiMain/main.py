@@ -320,9 +320,63 @@ def formula_medica(hospital: Hospital):
     print(formula_paciente)
     print(f"Precio total de la fórmula: {precio_total}")
 
+
 def asignar_habitacion(hospital: Hospital):
-    cedula = input("Ingrese el número de identificación del paciente: ")
-    print("Funcionalidad de asignar habitación no implementada.")
+    try:
+        cedula = int(input("Ingrese el número de identificación del paciente: "))
+    except ValueError:
+        print("Cédula inválida.")
+        return
+
+    paciente = hospital.buscarPaciente(cedula)
+    if not paciente:
+        print("Paciente no encontrado. Por favor regístrese primero.")
+        return
+
+    # Usar la instancia hospital para obtener las habitaciones disponibles
+    habitaciones_disponibles = [h for h in hospital.habitaciones if not h.ocupada]
+    if not habitaciones_disponibles:
+        print("No hay habitaciones disponibles en el momento.")
+        return
+
+    print("\nHabitaciones disponibles:")
+    for idx, habitacion in enumerate(habitaciones_disponibles, start=1):
+        categoria = habitacion.categoria.name
+        print(f"{idx}. Número: {habitacion.numero}, Categoría: {categoria}")
+
+    try:
+        opcion = int(input("Seleccione el número de la habitación deseada: "))
+    except ValueError:
+        print("Opción inválida.")
+        return
+
+    if opcion < 1 or opcion > len(habitaciones_disponibles):
+        print("Opción inválida, selección fuera de rango.")
+        return
+
+    habitacion_seleccionada = habitaciones_disponibles[opcion - 1]
+
+    try:
+        dias = int(input("Ingrese la cantidad de días de hospedaje: "))
+    except ValueError:
+        print("Número de días inválido.")
+        return
+
+    # Asignar la habitación al paciente y marcarla como ocupada
+    habitacion_seleccionada.paciente = paciente
+    habitacion_seleccionada.ocupada = True
+    habitacion_seleccionada.dias = dias
+    paciente.habitacion_asignada = habitacion_seleccionada
+
+    # Calcular el costo: costo = días * valor de la categoría (definido en CategoriaHabitacion)
+    costo_total = dias * habitacion_seleccionada.categoria.get_valor()
+    print(f"\n¡Habitación asignada con éxito!")
+    print(f"Paciente: {paciente.nombre}")
+    print(f"Habitación número: {habitacion_seleccionada.numero}")
+    print(f"Categoría: {habitacion_seleccionada.categoria.name}")
+    print(f"Días de hospedaje: {dias}")
+    print(f"Costo total: {costo_total}")
+
 
 def vacunacion(hospital: Hospital):
     cedula = input("Ingrese la cédula del paciente: ")
@@ -570,6 +624,7 @@ def construir_habitacion(hospital: Hospital):
 
     from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
     try:
+        # Usar la sintaxis de enum para obtener el miembro correspondiente
         categoria = CategoriaHabitacion[categoria_input]
     except KeyError:
         print(f"'{categoria_input}' no es una categoría válida.")
@@ -577,8 +632,10 @@ def construir_habitacion(hospital: Hospital):
 
     from gestorAplicacion.servicios.Habitacion import Habitacion
     nueva_habitacion = Habitacion(numero, categoria, False, None, 0)
-    Hospital.habitaciones.append(nueva_habitacion)
+    # Cambiar de Hospital.habitaciones a la instancia hospital.habitaciones
+    hospital.habitaciones.append(nueva_habitacion)
     print(f"Habitación número {numero} con categoría {categoria_input} construida con éxito.")
+
 
 def ver_habitacion(hospital: Hospital):
     habitaciones = Hospital.habitaciones

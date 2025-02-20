@@ -6,11 +6,10 @@ from gestorAplicacion.administracion.Medicamento import Medicamento  # Import Me
 from gestorAplicacion.administracion.Vacuna import Vacuna  # Import Vacuna
 
 class Hospital:
-    habitaciones: List[Habitacion] = []  # Now Habitacion is defined
-
     def __init__(self):
-        self.lista_doctores: List[Doctor] = []
+        self.habitaciones: List[Habitacion] = []
         self.lista_pacientes: List[Paciente] = []
+        self.lista_doctores: List[Doctor] = []
         self.lista_medicamentos: List[Medicamento] = []
         self.lista_vacunas: List[Vacuna] = []
 
