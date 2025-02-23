@@ -25,6 +25,9 @@ from gestorAplicacion.servicios.Servicio import Servicio
 from baseDatos.deserializador import cargar_todo
 from baseDatos.serializador import guardar_todo
 
+import tkinter as tk
+from GUI.GUI import Aplicacion
+
 def mostrar_mensaje_bienvenida():
     print("Bienvenido al Sistema de registro hospitalario basado en objetos")
 
@@ -1129,9 +1132,8 @@ def eliminar_cita_vacuna(hospital: Hospital):
 def main():
     hospital = Hospital()  # Instanciar hospital
     cargar_todo(hospital)  # Cargar datos persistidos, si existen
-    mostrar_mensaje_bienvenida()
-    mostrar_utilidad_programa()
-    menu_inicial(hospital)
+    app = Aplicacion(hospital)
+    app.mainloop()
 
 if __name__ == "__main__":
     main()
