@@ -1,57 +1,22 @@
 import tkinter as tk
-from tkinter import ttk, PhotoImage
-import os
+from tkinter import ttk, Menu, messagebox
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
         super().__init__(parent)
         self.pack(fill=tk.BOTH, expand=True)
         
-        # Main container frame
         self.container = ttk.Frame(self)
         self.container.pack(fill=tk.BOTH, expand=True)
         
-        # Left panel (Menu)
         self.frame_menu = ttk.Frame(self.container, borderwidth=2, relief="ridge")
         self.frame_menu.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         
-        ttk.Label(self.frame_menu, text="Menu Inicio", font=("Arial", 14)).pack(pady=10)
-        self.texto_hoja_vida = ttk.Label(self.frame_menu, text="[Hoja de vida del desarrollador]", wraplength=200)
-        self.texto_hoja_vida.pack(pady=10)
-        
-        image_folder = os.path.join(os.path.dirname(__file__), "archivos")
-        self.image_index = 0
-        self.images = []
-        
-        for i in range(1, 6):
-            filename = os.path.join(image_folder, f"image{i}.png")
-            if os.path.exists(filename):
-                self.images.append(PhotoImage(file=filename))
-        
-        if self.images:
-            self.label_image = ttk.Label(self.frame_menu, image=self.images[self.image_index])
-            self.label_image.pack(pady=10)
-            self.label_image.bind("<Enter>", self.change_image)
-        else:
-            self.label_image = ttk.Label(self.frame_menu, text="No images found")
-            self.label_image.pack(pady=10)
-        
+        ttk.Label(self.frame_menu, text="Bienvenido al Sistema de Gestión Hospitalaria", font=("Arial", 14)).pack(pady=10)
         ttk.Button(self.frame_menu, text="Ingresar", command=switch_callback).pack(pady=10)
         
-        # Right panel (Scene)
-        self.frame_scene = ttk.Frame(self.container, borderwidth=2, relief="ridge")
-        self.frame_scene.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
-        ttk.Label(self.frame_scene, text="Scene", font=("Arial", 14)).pack(pady=10)
-        
-        # Adjust grid proportions
         self.container.columnconfigure(0, weight=1)
-        self.container.columnconfigure(1, weight=2)
         self.container.rowconfigure(0, weight=1)
-
-    def change_image(self, event):
-        if self.images:
-            self.image_index = (self.image_index + 1) % len(self.images)
-            self.label_image.configure(image=self.images[self.image_index])
 
 class Aplicacion(tk.Tk):
     def __init__(self, hospital):
@@ -72,12 +37,57 @@ class VentanaPrincipal(ttk.Frame):
         self.hospital = hospital
         self.pack(fill=tk.BOTH, expand=True)
         
-        ttk.Label(self, text="Ventana Principal", font=("Arial", 16)).pack(pady=20)
-        ttk.Button(self, text="Gestión de Pacientes", command=self.gestion_pacientes).pack(pady=10)
-        ttk.Button(self, text="Gestión de Doctores", command=self.gestion_doctores).pack(pady=10)
+        self.label_titulo = ttk.Label(self, text="Sistema de Gestión Hospitalaria", font=("Arial", 16, "bold"))
+        self.label_titulo.pack(pady=10)
         
-    def gestion_pacientes(self):
-        print("Lógica de gestión de pacientes aquí")
+        self.menu_bar = Menu(parent)
+        parent.config(menu=self.menu_bar)
+        
+        menu_archivo = Menu(self.menu_bar, tearoff=0)
+        menu_archivo.add_command(label="Aplicación", command=self.mostrar_info_app)
+        menu_archivo.add_command(label="Salir", command=parent.quit)
+        
+        menu_procesos = Menu(self.menu_bar, tearoff=0)
+        menu_procesos.add_command(label="Agendar Citas", command=self.agendar_citas)
+        menu_procesos.add_command(label="Generar Fórmulas Médicas", command=self.generar_formulas_medicas)
+        menu_procesos.add_command(label="Asignar Habitaciones", command=self.asignar_habitaciones)
+        menu_procesos.add_command(label="Aplicación de Vacunas", command=self.aplicar_vacunas)
+        menu_procesos.add_command(label="Facturación", command=self.facturacion)
+        
+        menu_ayuda = Menu(self.menu_bar, tearoff=0)
+        menu_ayuda.add_command(label="Acerca de", command=self.mostrar_autores)
+        
+        self.menu_bar.add_cascade(label="Archivo", menu=menu_archivo)
+        self.menu_bar.add_cascade(label="Procesos y Consultas", menu=menu_procesos)
+        self.menu_bar.add_cascade(label="Ayuda", menu=menu_ayuda)
+        
+        self.frame_contenido = ttk.Frame(self, borderwidth=2, relief="ridge")
+        self.frame_contenido.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        ttk.Label(self.frame_contenido, text="Seleccione una opción del menú", font=("Arial", 12, "bold")).pack(pady=5)
     
-    def gestion_doctores(self):
-        print("Lógica de gestión de doctores aquí")
+    def mostrar_info_app(self):
+        messagebox.showinfo("Aplicación", "Sistema de Gestión Hospitalaria: Gestión de pacientes, doctores y servicios médicos.")
+    
+    def mostrar_autores(self):
+        messagebox.showinfo("Acerca de", "Autores: [Nombres de los desarrolladores]")
+
+    def agendar_citas(self):
+        from uiMain.main import agendar_citas
+        agendar_citas(self.hospital)
+
+    def generar_formulas_medicas(self):
+        from uiMain.main import formula_medica
+        formula_medica(self.hospital)
+
+    def asignar_habitaciones(self):
+        from uiMain.main import asignar_habitacion
+        asignar_habitacion(self.hospital)
+
+    def aplicar_vacunas(self):
+        from uiMain.main import vacunacion
+        vacunacion(self.hospital)
+
+    def facturacion(self):
+        from uiMain.main import facturacion
+        facturacion(self.hospital)
