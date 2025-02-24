@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, Menu, messagebox
+from tkinter import PhotoImage
+import os
+from PIL import Image, ImageTk  # Importar Pillow
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -9,14 +12,77 @@ class Inicio(ttk.Frame):
         self.container = ttk.Frame(self)
         self.container.pack(fill=tk.BOTH, expand=True)
         
-        self.frame_menu = ttk.Frame(self.container, borderwidth=2, relief="ridge")
-        self.frame_menu.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        # Contenedores principales
+        self.p1 = ttk.Frame(self.container)
+        self.p2 = ttk.Frame(self.container)
         
-        ttk.Label(self.frame_menu, text="Bienvenido al Sistema de Gestión Hospitalaria", font=("Arial", 14)).pack(pady=10)
-        ttk.Button(self.frame_menu, text="Ingresar", command=switch_callback).pack(pady=10)
+        self.p1.grid(row=0, column=0, sticky="nsew")
+        self.p2.grid(row=0, column=1, sticky="nsew")
+        
+        # Subcontenedores
+        self.p3 = ttk.Frame(self.p1, borderwidth=2, relief="ridge")
+        self.p4 = ttk.Frame(self.p1, borderwidth=2, relief="ridge")
+        self.p5 = ttk.Frame(self.p2, borderwidth=2, relief="ridge")
+        self.p6 = ttk.Frame(self.p2, borderwidth=2, relief="ridge")
+        
+        self.p3.pack(fill=tk.BOTH, expand=True)
+        self.p4.pack(fill=tk.BOTH, expand=True)
+        self.p5.pack(fill=tk.BOTH, expand=True)
+        self.p6.pack(fill=tk.BOTH, expand=True)
+        
+        # Zona P3 - Saludo de bienvenida
+        ttk.Label(self.p3, text="Bienvenido al Sistema de Gestión Hospitalaria", font=("Arial", 14)).pack(pady=10)
+        
+        # Zona P4 - Imagen y botón de ingreso
+        self.image_folder = os.path.join(os.path.dirname(__file__), "archivos")
+        self.image_index = 0
+        self.images = [self.load_image(os.path.join(self.image_folder, f"image{i}.png")) for i in range(1, 6)]
+        self.label_image = ttk.Label(self.p4, image=self.images[self.image_index])
+        self.label_image.pack(pady=10)
+        self.label_image.bind("<Enter>", self.change_image)
+        
+        ttk.Button(self.p4, text="Ingresar", command=switch_callback).pack(pady=10)
+        
+        # Zona P5 - Hoja de vida
+        self.desarrolladores = ["Desarrollador 1: Info", "Desarrollador 2: Info", "Desarrollador 3: Info"]
+        self.hoja_vida_index = 0
+        self.label_hoja_vida = ttk.Label(self.p5, text=self.desarrolladores[self.hoja_vida_index], wraplength=200)
+        self.label_hoja_vida.pack(pady=10)
+        self.label_hoja_vida.bind("<Button-1>", self.change_hoja_vida)
+        
+        # Zona P6 - Fotos de los desarrolladores
+        self.dev_images = [[self.load_image(os.path.join(self.image_folder, f"dev{i}_{j}.png")) for j in range(1, 5)] for i in range(1,4)]
+        self.frame_dev_images = ttk.Frame(self.p6)
+        self.frame_dev_images.pack()
+        self.update_dev_images()
         
         self.container.columnconfigure(0, weight=1)
+        self.container.columnconfigure(1, weight=1)
         self.container.rowconfigure(0, weight=1)
+    
+    def load_image(self, path, size=(100, 100)):
+        """Carga y redimensiona una imagen."""
+        image = Image.open(path)
+        image = image.resize(size, Image.LANCZOS)
+        return ImageTk.PhotoImage(image)
+    
+    def change_image(self, event):
+        self.image_index = (self.image_index + 1) % len(self.images)
+        self.label_image.configure(image=self.images[self.image_index])
+    
+    def change_hoja_vida(self, event):
+        self.hoja_vida_index = (self.hoja_vida_index + 1) % len(self.desarrolladores)
+        self.label_hoja_vida.configure(text=self.desarrolladores[self.hoja_vida_index])
+        self.update_dev_images()
+    
+    def update_dev_images(self):
+        for widget in self.frame_dev_images.winfo_children():
+            widget.destroy()
+        for i in range(2):
+            for j in range(2):
+                label = ttk.Label(self.frame_dev_images, image=self.dev_images[self.hoja_vida_index][i * 2 + j])
+                label.grid(row=i, column=j, padx=5, pady=5)
+
 
 class Aplicacion(tk.Tk):
     def __init__(self, hospital):
