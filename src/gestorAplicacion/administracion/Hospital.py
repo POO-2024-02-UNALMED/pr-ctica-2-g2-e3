@@ -6,20 +6,23 @@ from gestorAplicacion.administracion.Medicamento import Medicamento  # Import Me
 from gestorAplicacion.administracion.Vacuna import Vacuna  # Import Vacuna
 
 class Hospital:
+    # Atributo de clase (estático) para las habitaciones:
+    habitaciones: List[Habitacion] = []
+
     def __init__(self):
-        self.habitaciones: List[Habitacion] = []
+        # Estos atributos son de instancia:
         self.lista_pacientes: List[Paciente] = []
-        self.lista_doctores: List[Doctor] = []
+        self._lista_doctores: List[Doctor] = []
         self.lista_medicamentos: List[Medicamento] = []
         self.lista_vacunas: List[Vacuna] = []
 
     def agregar_doctor(self, doctor: Doctor):
         """Agrega un doctor a la lista de doctores del hospital"""
-        self.lista_doctores.append(doctor)
+        self._lista_doctores.append(doctor)
 
     def buscar_doctor(self, cedula: int) -> Doctor:
         """Busca un doctor por cédula en la lista de doctores"""
-        for doctor in self.lista_doctores:
+        for doctor in self._lista_doctores:
             if doctor.cedula == cedula:
                 return doctor
 
@@ -33,15 +36,13 @@ class Hospital:
                 return paciente
         return None
 
-
     def buscar_vacuna(self, nombre: str):
         for vacuna in self.lista_vacunas:
             if vacuna.nombre == nombre:
                 return vacuna
         return None
-    
-    
-    # ... (rest of the class remains unchanged) ...
+
+    # Propiedad para lista de doctores (mantiene la implementación existente)
     @property
     def lista_doctores(self) -> List[Doctor]:
         return self._lista_doctores
@@ -50,9 +51,7 @@ class Hospital:
     def lista_doctores(self, value: List[Doctor]):
         self._lista_doctores = value
 
-    # Repeat for other properties (lista_pacientes, lista_medicamentos, lista_vacunas)
-    # ...
-
+    # Métodos de clase para acceder y modificar las habitaciones (atributo estático)
     @classmethod
     def get_habitaciones(cls) -> List[Habitacion]:
         return cls.habitaciones
