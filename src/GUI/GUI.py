@@ -12,6 +12,16 @@ class Inicio(ttk.Frame):
         self.container = ttk.Frame(self)
         self.container.pack(fill=tk.BOTH, expand=True)
         
+        # Crear el menú
+        self.menu_bar = Menu(parent)
+        parent.config(menu=self.menu_bar)
+        
+        menu_inicio = Menu(self.menu_bar, tearoff=0)
+        menu_inicio.add_command(label="Descripción del Sistema", command=self.mostrar_descripcion)
+        menu_inicio.add_command(label="Salir", command=parent.quit)
+        
+        self.menu_bar.add_cascade(label="Inicio", menu=menu_inicio)
+        
         # Contenedores principales
         self.p1 = ttk.Frame(self.container)
         self.p2 = ttk.Frame(self.container)
@@ -51,7 +61,7 @@ class Inicio(ttk.Frame):
         self.label_hoja_vida.bind("<Button-1>", self.change_hoja_vida)
         
         # Zona P6 - Fotos de los desarrolladores
-        self.dev_images = [[self.load_image(os.path.join(self.image_folder, f"dev{i}_{j}.png")) for j in range(1, 5)] for i in range(1,4)]
+        self.dev_images = [[self.load_image(os.path.join(self.image_folder, f"dev{i}_{j}.png")) for j in range(1, 5)] for i in range(1, 4)]
         self.frame_dev_images = ttk.Frame(self.p6)
         self.frame_dev_images.pack()
         self.update_dev_images()
@@ -82,7 +92,9 @@ class Inicio(ttk.Frame):
             for j in range(2):
                 label = ttk.Label(self.frame_dev_images, image=self.dev_images[self.hoja_vida_index][i * 2 + j])
                 label.grid(row=i, column=j, padx=5, pady=5)
-
+    
+    def mostrar_descripcion(self):
+        messagebox.showinfo("Descripción del Sistema", "Sistema de Gestión Hospitalaria: Gestión de pacientes, doctores y servicios médicos.")
 
 class Aplicacion(tk.Tk):
     def __init__(self, hospital):
@@ -123,7 +135,7 @@ class VentanaPrincipal(ttk.Frame):
         menu_ayuda = Menu(self.menu_bar, tearoff=0)
         menu_ayuda.add_command(label="Acerca de", command=self.mostrar_autores)
         
-        self.menu_bar.add_cascade(label="Archivo", menu=menu_archivo)
+        self.menu_bar.add_cascade(label="Inicio", menu=menu_archivo)
         self.menu_bar.add_cascade(label="Procesos y Consultas", menu=menu_procesos)
         self.menu_bar.add_cascade(label="Ayuda", menu=menu_ayuda)
         
