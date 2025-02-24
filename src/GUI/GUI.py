@@ -46,7 +46,7 @@ class Inicio(ttk.Frame):
         # Zona P4 - Imagen y botón de ingreso
         self.image_folder = os.path.join(os.path.dirname(__file__), "archivos")
         self.image_index = 0
-        self.images = [self.load_image(os.path.join(self.image_folder, f"image{i}.png")) for i in range(1, 6)]
+        self.images = [self.load_image(os.path.join(self.image_folder, f"image{i}.png")) for i in range(1, 7)]
         self.label_image = ttk.Label(self.p4, image=self.images[self.image_index])
         self.label_image.pack(pady=10)
         self.label_image.bind("<Enter>", self.change_image)
@@ -54,7 +54,11 @@ class Inicio(ttk.Frame):
         ttk.Button(self.p4, text="Ingresar", command=switch_callback).pack(pady=10)
         
         # Zona P5 - Hoja de vida
-        self.desarrolladores = ["Desarrollador 1: Info", "Desarrollador 2: Info", "Desarrollador 3: Info"]
+        self.desarrolladores = [
+            "Samuel Gutierrez Betancur (19 años)\nIng. sistemas e informatica\nAficionado de la electronica y la guitarra",
+            "Desarrollador 2: Info",
+            "Samuel Garcia Rojas (19 años)\nIng. sistemas e informatica\nAficionado al futbol ",
+        ]
         self.hoja_vida_index = 0
         self.label_hoja_vida = ttk.Label(self.p5, text=self.desarrolladores[self.hoja_vida_index], wraplength=200)
         self.label_hoja_vida.pack(pady=10)
@@ -135,7 +139,7 @@ class VentanaPrincipal(ttk.Frame):
         menu_ayuda = Menu(self.menu_bar, tearoff=0)
         menu_ayuda.add_command(label="Acerca de", command=self.mostrar_autores)
         
-        self.menu_bar.add_cascade(label="Inicio", menu=menu_archivo)
+        self.menu_bar.add_cascade(label="Archivo", menu=menu_archivo)
         self.menu_bar.add_cascade(label="Procesos y Consultas", menu=menu_procesos)
         self.menu_bar.add_cascade(label="Ayuda", menu=menu_ayuda)
         
@@ -148,7 +152,7 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Aplicación", "Sistema de Gestión Hospitalaria: Gestión de pacientes, doctores y servicios médicos.")
     
     def mostrar_autores(self):
-        messagebox.showinfo("Acerca de", "Autores: [Nombres de los desarrolladores]")
+        messagebox.showinfo("Acerca de", "Autores: Samuel Gutierrez, Samuel Garcia, Samuel Botero")
 
     def agendar_citas(self):
         from uiMain.main import agendar_citas
