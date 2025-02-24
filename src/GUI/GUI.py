@@ -46,7 +46,7 @@ class Inicio(ttk.Frame):
         # Zona P4 - Imagen y botón de ingreso
         self.image_folder = os.path.join(os.path.dirname(__file__), "archivos")
         self.image_index = 0
-        self.images = [self.load_image(os.path.join(self.image_folder, f"image{i}.png")) for i in range(1, 7)]
+        self.images = [self.load_image(os.path.join(self.image_folder, f"image{i}.png")) for i in range(1, 6)]
         self.label_image = ttk.Label(self.p4, image=self.images[self.image_index])
         self.label_image.pack(pady=10)
         self.label_image.bind("<Enter>", self.change_image)
@@ -130,17 +130,17 @@ class VentanaPrincipal(ttk.Frame):
         menu_archivo.add_command(label="Salir", command=parent.quit)
         
         menu_procesos = Menu(self.menu_bar, tearoff=0)
-        menu_procesos.add_command(label="Agendar Citas", command=self.agendar_citas)
-        menu_procesos.add_command(label="Generar Fórmulas Médicas", command=self.generar_formulas_medicas)
-        menu_procesos.add_command(label="Asignar Habitaciones", command=self.asignar_habitaciones)
-        menu_procesos.add_command(label="Aplicación de Vacunas", command=self.aplicar_vacunas)
-        menu_procesos.add_command(label="Facturación", command=self.facturacion)
+        menu_procesos.add_command(label="Agendar Citas", command=self.mostrar_agendar_citas)
+        menu_procesos.add_command(label="Generar Fórmulas Médicas", command=self.mostrar_generar_formulas_medicas)
+        menu_procesos.add_command(label="Asignar Habitaciones", command=self.mostrar_asignar_habitaciones)
+        menu_procesos.add_command(label="Aplicación de Vacunas", command=self.mostrar_aplicar_vacunas)
+        menu_procesos.add_command(label="Facturación", command=self.mostrar_facturacion)
         
         menu_ayuda = Menu(self.menu_bar, tearoff=0)
         menu_ayuda.add_command(label="Acerca de", command=self.mostrar_autores)
         
         self.menu_bar.add_cascade(label="Archivo", menu=menu_archivo)
-        self.menu_bar.add_cascade(label="Procesos y Consultas", menu=menu_procesos)
+        self.menu_bar.add_cascade(menu=menu_procesos, label="Procesos y Consultas")
         self.menu_bar.add_cascade(label="Ayuda", menu=menu_ayuda)
         
         self.frame_contenido = ttk.Frame(self, borderwidth=2, relief="ridge")
@@ -153,6 +153,43 @@ class VentanaPrincipal(ttk.Frame):
     
     def mostrar_autores(self):
         messagebox.showinfo("Acerca de", "Autores: Samuel Gutierrez, Samuel Garcia, Samuel Botero")
+
+    def mostrar_agendar_citas(self):
+        self.actualizar_frame_contenido("Agendar Citas", "Descripción de agendar citas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+
+    def mostrar_generar_formulas_medicas(self):
+        self.actualizar_frame_contenido("Generar Fórmulas Médicas", "Descripción de generar fórmulas médicas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+
+    def mostrar_asignar_habitaciones(self):
+        self.actualizar_frame_contenido("Asignar Habitaciones", "Descripción de asignar habitaciones", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+
+    def mostrar_aplicar_vacunas(self):
+        self.actualizar_frame_contenido("Aplicación de Vacunas", "Descripción de aplicación de vacunas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+
+    def mostrar_facturacion(self):
+        self.actualizar_frame_contenido("Facturación", "Descripción de facturación", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+
+    def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
+        for widget in self.frame_contenido.winfo_children():
+            widget.destroy()
+        
+        ttk.Label(self.frame_contenido, text=titulo, font=("Arial", 14, "bold")).pack(pady=5)
+        ttk.Label(self.frame_contenido, text=descripcion, wraplength=400).pack(pady=5)
+        
+        frame_tabla = ttk.Frame(self.frame_contenido)
+        frame_tabla.pack(pady=5)
+        
+        for criterio, valor in criterios_valores:
+            fila = ttk.Frame(frame_tabla)
+            fila.pack(fill=tk.X, pady=2)
+            ttk.Label(fila, text=criterio, width=20).pack(side=tk.LEFT)
+            ttk.Label(fila, text=valor, width=20).pack(side=tk.LEFT)
+        
+        frame_botones = ttk.Frame(self.frame_contenido)
+        frame_botones.pack(pady=10)
+        
+        ttk.Button(frame_botones, text="Aceptar").pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_botones, text="Borrar").pack(side=tk.LEFT, padx=5)
 
     def agendar_citas(self):
         from uiMain.main import agendar_citas
