@@ -112,8 +112,9 @@ def menu_gestion(hospital: Hospital):
         else:
             print("Opción inválida, intente de nuevo.")
 
-def agendar_citas(hospital: Hospital):
-    cedula = input("Ingrese su número de cédula: ")
+def agendar_citas(hospital: Hospital, cedula: str = None):
+    if not cedula:
+        cedula = input("Ingrese su número de cédula: ")
     try:
         cedula = int(cedula)
     except ValueError:

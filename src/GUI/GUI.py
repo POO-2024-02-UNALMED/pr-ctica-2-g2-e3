@@ -3,6 +3,8 @@ from tkinter import ttk, Menu, messagebox
 from tkinter import PhotoImage
 import os
 from PIL import Image, ImageTk  # Importar Pillow
+from gestorAplicacion.administracion.Hospital import Hospital
+from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -155,19 +157,23 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Acerca de", "Autores: Samuel Gutierrez, Samuel Garcia, Samuel Botero")
 
     def mostrar_agendar_citas(self):
-        self.actualizar_frame_contenido("Agendar Citas", "Descripción de agendar citas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
-
+        self.actualizar_frame_contenido("Agendar Citas", "Ingrese el número de cédula del paciente:", [])
+    
     def mostrar_generar_formulas_medicas(self):
         self.actualizar_frame_contenido("Generar Fórmulas Médicas", "Descripción de generar fórmulas médicas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+        self.generar_formulas_medicas()
 
     def mostrar_asignar_habitaciones(self):
         self.actualizar_frame_contenido("Asignar Habitaciones", "Descripción de asignar habitaciones", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+        self.asignar_habitaciones()
 
     def mostrar_aplicar_vacunas(self):
         self.actualizar_frame_contenido("Aplicación de Vacunas", "Descripción de aplicación de vacunas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+        self.aplicar_vacunas()
 
     def mostrar_facturacion(self):
         self.actualizar_frame_contenido("Facturación", "Descripción de facturación", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
+        self.facturacion()
 
     def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
         for widget in self.frame_contenido.winfo_children():
@@ -176,24 +182,98 @@ class VentanaPrincipal(ttk.Frame):
         ttk.Label(self.frame_contenido, text=titulo, font=("Arial", 14, "bold")).pack(pady=5)
         ttk.Label(self.frame_contenido, text=descripcion, wraplength=400).pack(pady=5)
         
-        frame_tabla = ttk.Frame(self.frame_contenido)
-        frame_tabla.pack(pady=5)
-        
-        for criterio, valor in criterios_valores:
-            fila = ttk.Frame(frame_tabla)
-            fila.pack(fill=tk.X, pady=2)
-            ttk.Label(fila, text=criterio, width=20).pack(side=tk.LEFT)
-            ttk.Label(fila, text=valor, width=20).pack(side=tk.LEFT)
-        
-        frame_botones = ttk.Frame(self.frame_contenido)
-        frame_botones.pack(pady=10)
-        
-        ttk.Button(frame_botones, text="Aceptar").pack(side=tk.LEFT, padx=5)
-        ttk.Button(frame_botones, text="Borrar").pack(side=tk.LEFT, padx=5)
+        if titulo == "Agendar Citas":
+            self.entry_cedula = ttk.Entry(self.frame_contenido)
+            self.entry_cedula.pack(pady=5)
+            ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula).pack(pady=5)
+        else:
+            frame_tabla = ttk.Frame(self.frame_contenido)
+            frame_tabla.pack(pady=5)
+            
+            for criterio, valor in criterios_valores:
+                fila = ttk.Frame(frame_tabla)
+                fila.pack(fill=tk.X, pady=2)
+                ttk.Label(fila, text=criterio, width=20).pack(side=tk.LEFT)
+                ttk.Label(fila, text=valor, width=20).pack(side=tk.LEFT)
+            
+            frame_botones = ttk.Frame(self.frame_contenido)
+            frame_botones.pack(pady=10)
+            
+            ttk.Button(frame_botones, text="Aceptar").pack(side=tk.LEFT, padx=5)
+            ttk.Button(frame_botones, text="Borrar").pack(side=tk.LEFT, padx=5)
 
-    def agendar_citas(self):
+    def obtener_cedula(self):
+        cedula = self.entry_cedula.get()
+        if not cedula:
+            messagebox.showerror("Error", "Por favor ingrese un número de cédula.")
+            return
+        
+        # Llamar a la función de agendar citas del archivo main.py
+        try:
+            from uiMain.main import agendar_citas
+            self.agendar_citas(cedula)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo agendar la cita: {e}")
+
+    def agendar_citas(self, cedula):
         from uiMain.main import agendar_citas
-        agendar_citas(self.hospital)
+        self.cedula = cedula
+        self.actualizar_frame_contenido("Seleccione el tipo de cita", "Seleccione el tipo de cita que requiere:", [])
+        
+        self.tipo_cita_combobox = ttk.Combobox(self.frame_contenido, values=["General", "Odontologia", "Oftalmologia", "--Regresar al menú--"])
+        self.tipo_cita_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_tipo_cita).pack(pady=5)
+
+    def seleccionar_tipo_cita(self):
+        tipo_cita = self.tipo_cita_combobox.get()
+        if tipo_cita not in ["General", "Odontologia", "Oftalmologia", "--Regresar al menú--"]:
+            messagebox.showerror("Error", "Opción inválida.")
+            return
+        if tipo_cita == "--Regresar al menú--":
+            self.mostrar_agendar_citas()
+            return
+        
+        doctores_disponibles = [doc for doc in self.hospital.lista_doctores if doc.especialidad == tipo_cita]
+        if not doctores_disponibles:
+            messagebox.showerror("Error", "No hay doctores disponibles para la especialidad seleccionada.")
+            return
+        
+        self.actualizar_frame_contenido("Seleccione el doctor", "Doctores disponibles:", [])
+        self.doctor_combobox = ttk.Combobox(self.frame_contenido, values=[f"{doc.nombre}" for doc in doctores_disponibles] + ["--Regresar al menú--"])
+        self.doctor_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.seleccionar_doctor(doctores_disponibles)).pack(pady=5)
+
+    def seleccionar_doctor(self, doctores_disponibles):
+        doctor_seleccionado_nombre = self.doctor_combobox.get()
+        if doctor_seleccionado_nombre == "--Regresar al menú--":
+            self.mostrar_agendar_citas()
+            return
+        doctor_seleccionado = next((doc for doc in doctores_disponibles if doc.nombre == doctor_seleccionado_nombre), None)
+        if not doctor_seleccionado:
+            messagebox.showerror("Error", "Doctor no encontrado.")
+            return
+        
+        agenda_disponible = [cita for cita in doctor_seleccionado.agenda if cita.paciente is None]
+        if not agenda_disponible:
+            messagebox.showerror("Error", "El doctor seleccionado no tiene citas disponibles.")
+            return
+        
+        self.actualizar_frame_contenido("Seleccione la cita", "Citas disponibles:", [])
+        self.cita_combobox = ttk.Combobox(self.frame_contenido, values=[f"{cita.fecha}" for cita in agenda_disponible])
+        self.cita_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.confirmar_cita(doctor_seleccionado, agenda_disponible)).pack(pady=5)
+
+    def confirmar_cita(self, doctor_seleccionado, agenda_disponible):
+        cita_seleccionada_fecha = self.cita_combobox.get()
+        cita_seleccionada = next((cita for cita in agenda_disponible if cita.fecha == cita_seleccionada_fecha), None)
+        if not cita_seleccionada:
+            messagebox.showerror("Error", "Cita no encontrada.")
+            return
+        
+        paciente = self.hospital.buscarPaciente(int(self.cedula))
+        cita_seleccionada.paciente = paciente
+        messagebox.showinfo("Éxito", f"Cita agendada con éxito para {cita_seleccionada.fecha} con {doctor_seleccionado.nombre}.")
+        self.mostrar_agendar_citas()
 
     def generar_formulas_medicas(self):
         from uiMain.main import formula_medica
