@@ -913,7 +913,6 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Éxito", f"Vacuna '{vacuna_seleccionada.nombre}' aplicada con éxito para la cédula {self.cedula}.\nCita: {cita_seleccionada.get_fecha()}\nCosto: {vacuna_seleccionada.precio}")
 
     def facturacion(self, cedula):
-<<<<<<< HEAD
         try:
             cedula = int(cedula)
         except ValueError:
@@ -952,33 +951,16 @@ class VentanaPrincipal(ttk.Frame):
                         f"por {paciente.habitacion_asignada.dias} día(s)")
             servicios.append((descripcion, costo_habitacion))
             total += costo_habitacion
-=======
-        from uiMain.main import facturacion
-        paciente = self.hospital.buscarPaciente(int(cedula))
-        if paciente is None:
-            messagebox.showerror("Error", "Paciente no encontrado.")
-            return
->>>>>>> 52890ea0d7e145119d0372fefee6fcb920307f5b
 
         if not servicios:
             messagebox.showinfo("Información", "No se encontraron servicios facturables para este paciente.")
             return
 
-<<<<<<< HEAD
         factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" 
                                     for idx, (desc, costo) in enumerate(servicios)])
         factura_info = (f"--- Facturación para {paciente.nombre} ---\n\n"
                         f"Servicios facturados:\n{factura_detalle}\n\n"
                         f"Total a pagar: {total}")
-=======
-        factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" for idx, (desc, costo) in enumerate(servicios)])
-        self.actualizar_frame_contenido("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}")
-
-        ttk.Button(self.frame_contenido, text="Pagar", command=lambda: self.realizar_pago(total)).pack(pady=5)
-
-    def realizar_pago(self, total):
-        messagebox.showinfo("Pago Exitoso", f"Pago de {total} realizado con éxito.")
->>>>>>> 52890ea0d7e145119d0372fefee6fcb920307f5b
 
         # Mostrar la factura en una ventana y preguntar si se desea pagar
         proceder_pago = messagebox.askyesno("Factura Detallada", f"{factura_info}\n\n¿Desea proceder con el pago?")
