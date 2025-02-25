@@ -283,11 +283,6 @@ class VentanaPrincipal(ttk.Frame):
             return
 
         try:
-            if type(cedula) != int:
-                raise ErrorTipoDatoIncorrecto("Número de cédula", "int", type(cedula)) # Lanza la excepción si el tipo de dato es incorrecto
-        except ErrorTipoDatoIncorrecto as e:
-            messagebox.showerror("Error", str(e))
-        try:
             # Verificar si el paciente existe
             paciente = self.hospital.buscarPaciente(int(cedula))
             if not paciente:
