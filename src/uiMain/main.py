@@ -30,6 +30,8 @@ from baseDatos.serializador import guardar_todo
 import tkinter as tk
 from GUI.GUI import Aplicacion
 
+from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
+
 def mostrar_mensaje_bienvenida():
     print("Bienvenido al Sistema de registro hospitalario basado en objetos")
 
@@ -548,8 +550,7 @@ def facturacion(hospital: Hospital, cedula: str = None):
         total += costo_habitacion
 
     if not servicios:
-        print("No se encontraron servicios facturables para este paciente.")
-        return
+        raise ErrorNoServiciosFacturables(cedula)
 
     # Mostrar la factura detallada
     print("\nServicios facturados:")

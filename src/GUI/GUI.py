@@ -12,6 +12,7 @@ from gestorAplicacion.personas.Enfermedad import Enfermedad
 from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 
 from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
+from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -715,10 +716,20 @@ class VentanaPrincipal(ttk.Frame):
 
     def facturacion(self, cedula):
         from uiMain.main import facturacion
-        paciente = self.hospital.buscarPaciente(int(cedula))
-        if paciente is None:
-            messagebox.showerror("Error", "Paciente no encontrado.")
-            return
+        try:
+            # Llamada a la función facturacion en main.py
+            facturacion(self.hospital, cedula)
+        except ErrorNoServiciosFacturables as e:
+            # Capturamos la excepción cuando el paciente no tiene servicios facturables
+            messagebox.showerror("Error de Facturación", str(e))
+        except Exception as e:
+            # Capturamos cualquier otra excepción no prevista
+            messagebox.showerror("Error", f"Ocurrió un error inesperado: {str(e)}")
+
+
+
+
+
 
         servicios, total = facturacion(self.hospital, cedula)
         if not servicios:

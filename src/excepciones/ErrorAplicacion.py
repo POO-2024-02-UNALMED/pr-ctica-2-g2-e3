@@ -17,6 +17,11 @@ class ErrorRegistroNoEncontrado(ErrorRegistro):
     def __init__(self, cedula: int):
         super().__init__(f"Paciente con cédula {cedula} no encontrado.")
 
+class ErrorNoServiciosFacturables(ErrorRegistro):
+    def __init__(self, cedula: int):
+        super().__init__(f"Paciente con cédula {cedula} no tiene servicios facturables para la facturación.")
+
+
 class ErrorRegistroDatosInvalidos(ErrorRegistro):
     def __init__(self, campo: str):
         super().__init__(f"Datos inválidos para el paciente en el campo: {campo}.")
