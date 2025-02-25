@@ -243,12 +243,19 @@ class VentanaPrincipal(ttk.Frame):
 
     def registrar_paciente(self):
         self.actualizar_frame_contenido("Registrar Paciente", "Ingrese los datos del paciente:", [])
+        
+        ttk.Label(self.frame_contenido, text="Nombre:").pack(pady=5)
         self.entry_nombre = ttk.Entry(self.frame_contenido)
         self.entry_nombre.pack(pady=5)
+        
+        ttk.Label(self.frame_contenido, text="Cédula:").pack(pady=5)
         self.entry_cedula = ttk.Entry(self.frame_contenido)
         self.entry_cedula.pack(pady=5)
+        
+        ttk.Label(self.frame_contenido, text="EPS:").pack(pady=5)
         self.entry_eps = ttk.Entry(self.frame_contenido)
         self.entry_eps.pack(pady=5)
+        
         ttk.Button(self.frame_contenido, text="Registrar", command=self.confirmar_registro_paciente).pack(pady=5)
 
     def confirmar_registro_paciente(self):
@@ -826,12 +833,19 @@ class VentanaPrincipal(ttk.Frame):
 
     def registrar_paciente(self):
         self.actualizar_frame_contenido("Registrar Paciente", "Ingrese los datos del paciente:", [])
+        
+        ttk.Label(self.frame_contenido, text="Nombre:").pack(pady=5)
         self.entry_nombre = ttk.Entry(self.frame_contenido)
         self.entry_nombre.pack(pady=5)
+        
+        ttk.Label(self.frame_contenido, text="Cédula:").pack(pady=5)
         self.entry_cedula = ttk.Entry(self.frame_contenido)
         self.entry_cedula.pack(pady=5)
+        
+        ttk.Label(self.frame_contenido, text="EPS:").pack(pady=5)
         self.entry_eps = ttk.Entry(self.frame_contenido)
         self.entry_eps.pack(pady=5)
+        
         ttk.Button(self.frame_contenido, text="Registrar", command=self.confirmar_registro_paciente).pack(pady=5)
 
     def confirmar_registro_paciente(self):
