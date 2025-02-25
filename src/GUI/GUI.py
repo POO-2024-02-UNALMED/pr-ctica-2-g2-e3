@@ -66,7 +66,7 @@ class Inicio(ttk.Frame):
         # Zona P5 - Hoja de vida
         self.desarrolladores = [
             "Samuel Gutierrez Betancur (19 años)\nIng. sistemas e informatica\nAficionado de la electronica y la guitarra",
-            "Desarrollador 2: Info",
+            "Samuel Botero Rivera (25 años)\nIng.  fisica\nMi tiempo libre me gusta dedicarlo a la fotografia y a leer",
             "Samuel Garcia Rojas (19 años)\nIng. sistemas e informatica\nAficionado al futbol ",
         ]
         self.hoja_vida_index = 0
