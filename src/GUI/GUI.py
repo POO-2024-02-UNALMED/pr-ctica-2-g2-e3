@@ -161,27 +161,15 @@ class VentanaPrincipal(ttk.Frame):
     
     def mostrar_generar_formulas_medicas(self):
         self.actualizar_frame_contenido("Generar Fórmulas Médicas", "Ingrese el número de cédula del paciente:", [])
-        self.entry_cedula = ttk.Entry(self.frame_contenido)
-        self.entry_cedula.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_formula).pack(pady=5)
-
+    
     def mostrar_asignar_habitaciones(self):
         self.actualizar_frame_contenido("Asignar Habitaciones", "Ingrese el número de cédula del paciente:", [])
-        self.entry_cedula = ttk.Entry(self.frame_contenido)
-        self.entry_cedula.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_habitacion).pack(pady=5)
-
+    
     def mostrar_aplicar_vacunas(self):
         self.actualizar_frame_contenido("Aplicación de Vacunas", "Ingrese el número de cédula del paciente:", [])
-        self.entry_cedula = ttk.Entry(self.frame_contenido)
-        self.entry_cedula.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_vacuna).pack(pady=5)
-
+    
     def mostrar_facturacion(self):
         self.actualizar_frame_contenido("Facturación", "Ingrese el número de cédula del paciente:", [])
-        self.entry_cedula = ttk.Entry(self.frame_contenido)
-        self.entry_cedula.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_facturacion).pack(pady=5)
 
     def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
         for widget in self.frame_contenido.winfo_children():
@@ -292,9 +280,18 @@ class VentanaPrincipal(ttk.Frame):
         self.cedula = cedula
         self.actualizar_frame_contenido("Seleccione la fórmula médica", "Seleccione la fórmula médica que requiere:", [])
         
-        # Supongamos que tenemos una lista de fórmulas médicas disponibles
-        formulas_medicas_disponibles = ["Fórmula 1", "Fórmula 2", "Fórmula 3"]
-        self.formula_combobox = ttk.Combobox(self.frame_contenido, values=formulas_medicas_disponibles)
+        # Obtener las opciones de fórmulas médicas desde la lógica del programa
+        paciente = self.hospital.buscarPaciente(int(cedula))
+        if not paciente:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+        
+        if not paciente.historia_clinica.enfermedades:
+            messagebox.showerror("Error", "No hay enfermedades registradas. Diríjase a la opción de registrar enfermedad.")
+            return
+        
+        enfermedades_disponibles = [f"{enfermedad.nombre} - {enfermedad.tipologia}" for enfermedad in paciente.historia_clinica.enfermedades]
+        self.formula_combobox = ttk.Combobox(self.frame_contenido, values=enfermedades_disponibles)
         self.formula_combobox.pack(pady=5)
         ttk.Button(self.frame_contenido, text="Aceptar", command=self.confirmar_formula_medica).pack(pady=5)
 
@@ -304,18 +301,6 @@ class VentanaPrincipal(ttk.Frame):
             messagebox.showerror("Error", "Por favor seleccione una fórmula médica.")
             return
         
-        # Aquí puedes continuar con la lógica de generar la fórmula médica usando el número de cédula y la fórmula seleccionada
-        # Por ejemplo, podrías llamar a una función que maneje el proceso de generar la fórmula médica
-        # y pasarle el número de cédula y la fórmula seleccionada como argumentos.
-        
-        # Ejemplo:
-        # resultado = generar_formula_medica(self.hospital, self.cedula, formula_seleccionada)
-        # if resultado:
-        #     messagebox.showinfo("Éxito", "Fórmula médica generada con éxito.")
-        # else:
-        #     messagebox.showerror("Error", "No se pudo generar la fórmula médica.")
-        
-        # Para este ejemplo, simplemente mostramos un mensaje de éxito.
         messagebox.showinfo("Éxito", f"Fórmula médica '{formula_seleccionada}' generada con éxito para la cédula {self.cedula}.")
 
     def asignar_habitaciones(self, cedula):
