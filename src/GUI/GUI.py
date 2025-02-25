@@ -1,6 +1,14 @@
+import os
+import sys
+# Agregar la raíz del proyecto a sys.path (por ejemplo, d:/uni/POO/proyecto/pr-ctica-2-g2-e3/)
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 import tkinter as tk
 from tkinter import ttk, Menu, messagebox
 from tkinter import PhotoImage
+from tkinter import simpledialog
 import os
 from PIL import Image, ImageTk  # Importar Pillow
 from gestorAplicacion.administracion.Hospital import Hospital
@@ -13,6 +21,7 @@ from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 
 from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
 from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
+
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -653,30 +662,42 @@ class VentanaPrincipal(ttk.Frame):
         self.habitacion_combobox.pack(pady=5)
         ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.confirmar_habitacion(habitaciones_disponibles)).pack(pady=5)
 
+
+
     def confirmar_habitacion(self, habitaciones_disponibles):
         habitacion_seleccionada_desc = self.habitacion_combobox.get()
-        habitacion_seleccionada = next((h for h in habitaciones_disponibles if f"Número: {h.numero}, Categoría: {h.categoria.name}" == habitacion_seleccionada_desc), None)
+        habitacion_seleccionada = next((h for h in habitaciones_disponibles 
+                                        if f"Número: {h.numero}, Categoría: {h.categoria.name}" == habitacion_seleccionada_desc), None)
         if not habitacion_seleccionada:
             messagebox.showerror("Error", "Habitación no encontrada.")
             return
-        
-        try:
-            dias = int(input("Ingrese la cantidad de días de hospedaje: "))
-        except ValueError:
-            messagebox.showerror("Error", "Número de días inválido.")
+
+        # Solicitar el número de días mediante un diálogo de entrada
+        dias = simpledialog.askinteger("Días de hospedaje", "Ingrese la cantidad de días de hospedaje:")
+        if dias is None:
+            messagebox.showerror("Error", "Debe ingresar un número de días válido.")
             return
-        
+
         # Asignar la habitación al paciente y marcarla como ocupada
         paciente = self.hospital.buscarPaciente(int(self.cedula))
         habitacion_seleccionada.paciente = paciente
         habitacion_seleccionada.ocupada = True
         habitacion_seleccionada.dias = dias
         paciente.habitacion_asignada = habitacion_seleccionada
-        
+
         # Calcular el costo: costo = días * valor de la categoría (definido en CategoriaHabitacion)
         costo_total = dias * habitacion_seleccionada.categoria.get_valor()
-        messagebox.showinfo("Éxito", f"Habitación asignada con éxito.\nPaciente: {paciente.nombre}\nHabitación número: {habitacion_seleccionada.numero}\nCategoría: {habitacion_seleccionada.categoria.name}\nDías de hospedaje: {dias}\nCosto total: {costo_total}")
-
+        messagebox.showinfo("Éxito", f"Habitación asignada con éxito.\nPaciente: {paciente.nombre}\n"
+                                    f"Habitación número: {habitacion_seleccionada.numero}\n"
+                                    f"Categoría: {habitacion_seleccionada.categoria.name}\n"
+                                    f"Días de hospedaje: {dias}\nCosto total: {costo_total}")
+            
+            # Calcular el costo: costo = días * valor de la categoría (definido en CategoriaHabitacion)
+        costo_total = dias * habitacion_seleccionada.categoria.get_valor()
+        messagebox.showinfo("Éxito", f"Habitación asignada con éxito.\nPaciente: {paciente.nombre}\n"
+                                    f"Habitación número: {habitacion_seleccionada.numero}\n"
+                                    f"Categoría: {habitacion_seleccionada.categoria.name}\n"
+                                    f"Días de hospedaje: {dias}\nCosto total: {costo_total}")
     def aplicar_vacunas(self, cedula):
         self.cedula = cedula
         self.actualizar_frame_contenido("Seleccione el tipo de vacuna", "Seleccione el tipo de vacuna que desea aplicar:", [])
