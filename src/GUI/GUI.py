@@ -11,7 +11,7 @@ from gestorAplicacion.personas.Doctor import Doctor
 from gestorAplicacion.personas.Enfermedad import Enfermedad
 from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 
-from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
+from excepciones.ErrorAplicacion import ErrorRegistroNoEncontrado
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -218,7 +218,7 @@ class VentanaPrincipal(ttk.Frame):
             # Verificar si el paciente existe
             paciente = self.hospital.buscarPaciente(int(cedula))
             if not paciente:
-                raise ErrorPacienteNoEncontrado(int(cedula))  # Lanza la excepción si el paciente no se encuentra
+                raise ErrorRegistroNoEncontrado(int(cedula))  # Lanza la excepción si el paciente no se encuentra
 
             # Si el paciente no tiene errores, hacer algo según el título
             if titulo == "Agendar Citas":
@@ -231,7 +231,7 @@ class VentanaPrincipal(ttk.Frame):
                 self.aplicar_vacunas(cedula)
             elif titulo == "Facturación":
                 self.facturacion(cedula)
-        except ErrorPacienteNoEncontrado as e:
+        except ErrorRegistroNoEncontrado as e:
             messagebox.showerror("Error", str(e))  # Muestra el mensaje de error de la excepción
         except ValueError as e:
             messagebox.showerror("Error", f"Valor incorrecto: {e}")  # En caso de que haya un error en el valor ingresado

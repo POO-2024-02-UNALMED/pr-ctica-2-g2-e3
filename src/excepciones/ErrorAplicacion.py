@@ -9,20 +9,20 @@ class ErrorAplicacion(Exception):
 
 
 
-class ErrorPaciente(ErrorAplicacion):
+class ErrorRegistro(ErrorAplicacion):
     def __init__(self, mensaje: str):
-        super().__init__(f"Error en la gestión de pacientes: {mensaje}")
+        super().__init__(f"Error en la gestión de registros: {mensaje}")
 
-class ErrorPacienteNoEncontrado(ErrorPaciente):
+class ErrorRegistroNoEncontrado(ErrorRegistro):
     def __init__(self, cedula: int):
         super().__init__(f"Paciente con cédula {cedula} no encontrado.")
 
-class ErrorPacienteDatosInvalidos(ErrorPaciente):
+class ErrorRegistroDatosInvalidos(ErrorRegistro):
     def __init__(self, campo: str):
         super().__init__(f"Datos inválidos para el paciente en el campo: {campo}.")
 
 # Excepción sugerida:
-class ValueErrorPaciente(ErrorPaciente):
+class ValueErrorRegistro(ErrorRegistro):
     def __init__(self, mensaje: str):
         super().__init__(f"Valor incorrecto para paciente: {mensaje}")
 
