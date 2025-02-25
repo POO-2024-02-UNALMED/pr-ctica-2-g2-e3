@@ -22,6 +22,7 @@ from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
 from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
 from excepciones.ErrorAplicacion import ErrorCampoVacio
+from excepciones.ErrorAplicacion import ErrorTipoDatoIncorrecto
 
 
 class Inicio(ttk.Frame):
@@ -183,18 +184,77 @@ class VentanaPrincipal(ttk.Frame):
 
     def mostrar_agendar_citas(self):
         self.actualizar_frame_contenido("Agendar Citas", "Ingrese el número de cédula del paciente:", [])
-    
+        
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula("Agendar Citas")).pack(pady=5)
+
     def mostrar_generar_formulas_medicas(self):
         self.actualizar_frame_contenido("Generar Fórmulas Médicas", "Ingrese el número de cédula del paciente:", [])
-    
+        
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula("Generar Fórmulas Médicas")).pack(pady=5)
+
     def mostrar_asignar_habitaciones(self):
         self.actualizar_frame_contenido("Asignar Habitaciones", "Ingrese el número de cédula del paciente:", [])
-    
+        
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula("Asignar Habitaciones")).pack(pady=5)
+
     def mostrar_aplicar_vacunas(self):
         self.actualizar_frame_contenido("Aplicación de Vacunas", "Ingrese el número de cédula del paciente:", [])
-    
+        
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula("Aplicación de Vacunas")).pack(pady=5)
+
     def mostrar_facturacion(self):
         self.actualizar_frame_contenido("Facturación", "Ingrese el número de cédula del paciente:", [])
+        
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_facturacion).pack(pady=5)
+
+    def obtener_cedula_facturacion(self):
+        cedula = self.entry_cedula.get()
+        if not cedula:
+            messagebox.showerror("Error", "Por favor ingrese un número de cédula.")
+            return
+
+        try:
+            # Verificar si el paciente existe
+            paciente = self.hospital.buscarPaciente(int(cedula))
+            if not paciente:
+                raise ErrorPacienteNoEncontrado(int(cedula))  # Lanza la excepción si el paciente no se encuentra
+
+            # Proceder con la facturación
+            self.facturacion(cedula)
+        except ErrorPacienteNoEncontrado as e:
+            messagebox.showerror("Error", str(e))  # Muestra el mensaje de error de la excepción
+        except ValueError as e:
+            messagebox.showerror("Error", f"Valor incorrecto: {e}")  # En caso de que haya un error en el valor ingresado
+
+    def facturacion(self, cedula):
+        from uiMain.main import facturacion
+        paciente = self.hospital.buscarPaciente(int(cedula))
+        if paciente is None:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+
+        servicios, total = facturacion(self.hospital, cedula)
+        if not servicios:
+            messagebox.showinfo("Información", "No se encontraron servicios facturables para este paciente.")
+            return
+
+        factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" for idx, (desc, costo) in enumerate(servicios)])
+        self.actualizar_frame_contenido("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}", [])
+
+        ttk.Button(self.frame_contenido, text="Pagar", command=lambda: self.realizar_pago(total)).pack(pady=5)
+
+    def realizar_pago(self, total):
+        messagebox.showinfo("Pago Exitoso", f"Pago de {total} realizado con éxito.")
 
     def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
         for widget in self.frame_contenido.winfo_children():
@@ -203,13 +263,7 @@ class VentanaPrincipal(ttk.Frame):
         ttk.Label(self.frame_contenido, text=titulo, font=("Arial", 14, "bold")).pack(pady=5)
         ttk.Label(self.frame_contenido, text=descripcion, wraplength=400).pack(pady=5)
         
-        if titulo in ["Agendar Citas", "Generar Fórmulas Médicas", "Asignar Habitaciones", "Aplicación de Vacunas", "Facturación"]:
-            self.entry_cedula = ttk.Entry(self.frame_contenido)
-            self.entry_cedula.pack(pady=5)
-            ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula(titulo)).pack(pady=5)
-        elif titulo.startswith("Gestionar"):
-            pass
-        else:
+        if criterios_valores:
             frame_tabla = ttk.Frame(self.frame_contenido)
             frame_tabla.pack(pady=5)
             
@@ -223,12 +277,17 @@ class VentanaPrincipal(ttk.Frame):
         cedula = self.entry_cedula.get()
         try:
             if not cedula:
-                raise ErrorCampoVacio("Número de cédula")  # Lanza la excepción si el campo está vacío
+                raise ErrorCampoVacio ("Número de cédula") # Lanza la excepción si el campo está vacío
         
         except ErrorCampoVacio as e:
             messagebox.showerror("Error", str(e))
             return
 
+        try:
+            if type(cedula) != int:
+                raise ErrorTipoDatoIncorrecto("Número de cédula", "int", type(cedula)) # Lanza la excepción si el tipo de dato es incorrecto
+        except ErrorTipoDatoIncorrecto as e:
+            messagebox.showerror("Error", str(e))
         try:
             # Verificar si el paciente existe
             paciente = self.hospital.buscarPaciente(int(cedula))
@@ -534,13 +593,7 @@ class VentanaPrincipal(ttk.Frame):
         ttk.Label(self.frame_contenido, text=titulo, font=("Arial", 14, "bold")).pack(pady=5)
         ttk.Label(self.frame_contenido, text=descripcion, wraplength=400).pack(pady=5)
         
-        if titulo in ["Agendar Citas", "Generar Fórmulas Médicas", "Asignar Habitaciones", "Aplicación de Vacunas", "Facturación"]:
-            self.entry_cedula = ttk.Entry(self.frame_contenido)
-            self.entry_cedula.pack(pady=5)
-            ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula(titulo)).pack(pady=5)
-        elif titulo.startswith("Gestionar"):
-            pass
-        else:
+        if criterios_valores:
             frame_tabla = ttk.Frame(self.frame_contenido)
             frame_tabla.pack(pady=5)
             
@@ -820,9 +873,47 @@ class VentanaPrincipal(ttk.Frame):
         if not paciente:
             messagebox.showerror("Error", "Paciente no encontrado.")
             return
-        messagebox.showinfo("Éxito", f"Vacuna '{vacuna_seleccionada.nombre}' aplicada con éxito para la cédula {self.cedula}.")
+
+        # Mostrar la agenda disponible para la vacuna seleccionada
+        agenda_disponible = vacuna_seleccionada.mostrar_agenda_disponible()
+        if not agenda_disponible:
+            messagebox.showerror("Error", "No hay citas disponibles para esta vacuna.")
+            return
+
+        self.actualizar_frame_contenido("Seleccione la cita", "Citas disponibles:", [])
+        self.cita_combobox = ttk.Combobox(self.frame_contenido, values=[cita.get_fecha() for cita in agenda_disponible])
+        self.cita_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.confirmar_cita_vacuna(vacuna_seleccionada, agenda_disponible)).pack(pady=5)
+
+    def confirmar_cita_vacuna(self, vacuna_seleccionada, agenda_disponible):
+        fecha_cita = self.cita_combobox.get()
+        cita_seleccionada = next((cita for cita in agenda_disponible if cita.get_fecha() == fecha_cita), None)
+        if not cita_seleccionada:
+            messagebox.showerror("Error", "Cita no encontrada.")
+            return
+
+        paciente = self.hospital.buscarPaciente(int(self.cedula))
+        if not paciente:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+
+        # Asignar la cita al paciente
+        cita_seleccionada.paciente = paciente
+
+        # Actualizar el historial de vacunas del paciente
+        if not hasattr(paciente, "historia_clinica"):
+            paciente.historia_clinica = type("HistoriaClinica", (), {"historial_vacunas": []})()
+        paciente.historia_clinica.historial_vacunas.append(cita_seleccionada)
+
+        # Agregar el costo de la vacuna a la lista de servicios del paciente
+        if not hasattr(paciente, "servicios"):
+            paciente.servicios = []
+        paciente.servicios.append(("Vacuna", vacuna_seleccionada.precio))
+
+        messagebox.showinfo("Éxito", f"Vacuna '{vacuna_seleccionada.nombre}' aplicada con éxito para la cédula {self.cedula}.\nCita: {cita_seleccionada.get_fecha()}\nCosto: {vacuna_seleccionada.precio}")
 
     def facturacion(self, cedula):
+<<<<<<< HEAD
         try:
             cedula = int(cedula)
         except ValueError:
@@ -861,16 +952,33 @@ class VentanaPrincipal(ttk.Frame):
                         f"por {paciente.habitacion_asignada.dias} día(s)")
             servicios.append((descripcion, costo_habitacion))
             total += costo_habitacion
+=======
+        from uiMain.main import facturacion
+        paciente = self.hospital.buscarPaciente(int(cedula))
+        if paciente is None:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+>>>>>>> 52890ea0d7e145119d0372fefee6fcb920307f5b
 
         if not servicios:
             messagebox.showinfo("Información", "No se encontraron servicios facturables para este paciente.")
             return
 
+<<<<<<< HEAD
         factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" 
                                     for idx, (desc, costo) in enumerate(servicios)])
         factura_info = (f"--- Facturación para {paciente.nombre} ---\n\n"
                         f"Servicios facturados:\n{factura_detalle}\n\n"
                         f"Total a pagar: {total}")
+=======
+        factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" for idx, (desc, costo) in enumerate(servicios)])
+        self.actualizar_frame_contenido("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}")
+
+        ttk.Button(self.frame_contenido, text="Pagar", command=lambda: self.realizar_pago(total)).pack(pady=5)
+
+    def realizar_pago(self, total):
+        messagebox.showinfo("Pago Exitoso", f"Pago de {total} realizado con éxito.")
+>>>>>>> 52890ea0d7e145119d0372fefee6fcb920307f5b
 
         # Mostrar la factura en una ventana y preguntar si se desea pagar
         proceder_pago = messagebox.askyesno("Factura Detallada", f"{factura_info}\n\n¿Desea proceder con el pago?")

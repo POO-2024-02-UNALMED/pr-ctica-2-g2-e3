@@ -48,6 +48,7 @@ class ErrorEntrada(ErrorAplicacion):
 
 class ErrorCampoVacio(ErrorEntrada):
     def __init__(self, campo: str):
+        super().__init__()
         self.message = f"El campo {campo} no puede estar vacío."
         super().__init__(self.message)
 
