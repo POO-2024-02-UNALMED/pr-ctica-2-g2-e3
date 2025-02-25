@@ -22,6 +22,7 @@ from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
 from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
 from excepciones.ErrorAplicacion import ErrorCampoVacio
+from excepciones.ErrorAplicacion import ErrorTipoDatoIncorrecto
 
 
 class Inicio(ttk.Frame):
@@ -223,12 +224,17 @@ class VentanaPrincipal(ttk.Frame):
         cedula = self.entry_cedula.get()
         try:
             if not cedula:
-                raise ErrorCampoVacio("Número de cédula")  # Lanza la excepción si el campo está vacío
+                raise ErrorCampoVacio ("Número de cédula") # Lanza la excepción si el campo está vacío
         
         except ErrorCampoVacio as e:
             messagebox.showerror("Error", str(e))
             return
 
+        try:
+            if type(cedula) != int:
+                raise ErrorTipoDatoIncorrecto("Número de cédula", "int", type(cedula)) # Lanza la excepción si el tipo de dato es incorrecto
+        except ErrorTipoDatoIncorrecto as e:
+            messagebox.showerror("Error", str(e))
         try:
             # Verificar si el paciente existe
             paciente = self.hospital.buscarPaciente(int(cedula))
