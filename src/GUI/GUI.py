@@ -21,6 +21,7 @@ from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 
 from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
 from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
+from excepciones.ErrorAplicacion import ErrorCampoVacio
 
 
 class Inicio(ttk.Frame):
@@ -220,8 +221,12 @@ class VentanaPrincipal(ttk.Frame):
 
     def obtener_cedula(self, titulo):
         cedula = self.entry_cedula.get()
-        if not cedula:
-            messagebox.showerror("Error", "Por favor ingrese un número de cédula.")
+        try:
+            if not cedula:
+                raise ErrorCampoVacio("Número de cédula")  # Lanza la excepción si el campo está vacío
+        
+        except ErrorCampoVacio as e:
+            messagebox.showerror("Error", str(e))
             return
 
         try:
