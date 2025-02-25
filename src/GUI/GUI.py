@@ -305,7 +305,48 @@ class VentanaPrincipal(ttk.Frame):
 
     def asignar_habitaciones(self, cedula):
         from uiMain.main import asignar_habitacion
-        asignar_habitacion(self.hospital, cedula)
+        self.cedula = cedula
+        self.actualizar_frame_contenido("Seleccione la habitación", "Seleccione la habitación que desea asignar:", [])
+        
+        # Obtener las habitaciones disponibles desde la lógica del programa
+        paciente = self.hospital.buscarPaciente(int(cedula))
+        if not paciente:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+        
+        habitaciones_disponibles = [h for h in self.hospital.habitaciones if not h.ocupada]
+        if not habitaciones_disponibles:
+            messagebox.showerror("Error", "No hay habitaciones disponibles en el momento.")
+            return
+        
+        habitaciones_opciones = [f"Número: {h.numero}, Categoría: {h.categoria.name}" for h in habitaciones_disponibles]
+        self.habitacion_combobox = ttk.Combobox(self.frame_contenido, values=habitaciones_opciones)
+        self.habitacion_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.confirmar_habitacion(habitaciones_disponibles)).pack(pady=5)
+
+    def confirmar_habitacion(self, habitaciones_disponibles):
+        habitacion_seleccionada_desc = self.habitacion_combobox.get()
+        habitacion_seleccionada = next((h for h in habitaciones_disponibles if f"Número: {h.numero}, Categoría: {h.categoria.name}" == habitacion_seleccionada_desc), None)
+        if not habitacion_seleccionada:
+            messagebox.showerror("Error", "Habitación no encontrada.")
+            return
+        
+        try:
+            dias = int(input("Ingrese la cantidad de días de hospedaje: "))
+        except ValueError:
+            messagebox.showerror("Error", "Número de días inválido.")
+            return
+        
+        # Asignar la habitación al paciente y marcarla como ocupada
+        paciente = self.hospital.buscarPaciente(int(self.cedula))
+        habitacion_seleccionada.paciente = paciente
+        habitacion_seleccionada.ocupada = True
+        habitacion_seleccionada.dias = dias
+        paciente.habitacion_asignada = habitacion_seleccionada
+        
+        # Calcular el costo: costo = días * valor de la categoría (definido en CategoriaHabitacion)
+        costo_total = dias * habitacion_seleccionada.categoria.get_valor()
+        messagebox.showinfo("Éxito", f"Habitación asignada con éxito.\nPaciente: {paciente.nombre}\nHabitación número: {habitacion_seleccionada.numero}\nCategoría: {habitacion_seleccionada.categoria.name}\nDías de hospedaje: {dias}\nCosto total: {costo_total}")
 
     def aplicar_vacunas(self, cedula):
         from uiMain.main import vacunacion
