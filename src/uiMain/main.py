@@ -1,7 +1,7 @@
 import sys
 import os
 
-DEBUG_MODE = False  # Cambiar a False para usar la GUI
+DEBUG_MODE = True  # Cambiar a False para usar la GUI
 
 # 1. Add the project root to sys.path FIRST
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -778,7 +778,7 @@ def construir_habitacion(hospital: Hospital):
     try:
         numero = int(input("Ingrese el número de la habitación: "))
     except ValueError:
-        print("Número inválido.")
+        print("Número de habitación inválido.")
         return
 
     print("Elija el tipo de habitación que desea construir")
@@ -800,21 +800,23 @@ def construir_habitacion(hospital: Hospital):
     }
     categoria_input = opciones.get(opcion)
     if categoria_input is None:
-        print("Opción inválida.")
+        print("Opción no válida.")
         return
 
+    # Convertir el string a CategoriaHabitacion
     from gestorAplicacion.administracion.CategoriaHabitacion import CategoriaHabitacion
     try:
-        # Usar la sintaxis de enum para obtener el miembro correspondiente
         categoria = CategoriaHabitacion[categoria_input]
     except KeyError:
-        print(f"'{categoria_input}' no es una categoría válida.")
+        print("Categoria no encontrada.")
         return
 
+    # Crear la nueva habitación
     from gestorAplicacion.servicios.Habitacion import Habitacion
     nueva_habitacion = Habitacion(numero, categoria, False, None, 0)
-    # Cambiar de Hospital.habitaciones a la instancia hospital.habitaciones
-    hospital.habitaciones.append(nueva_habitacion)
+    
+    # Agregar la habitación a la lista de habitaciones de la clase Hospital
+    Hospital.habitaciones.append(nueva_habitacion)
     print(f"Habitación número {numero} con categoría {categoria_input} construida con éxito.")
 
 
@@ -1151,9 +1153,11 @@ def eliminar_cita_vacuna(hospital: Hospital):
 
 def main():
     hospital = Hospital()  # Instanciar hospital
-    cargar_todo(hospital)  # Cargar datos persistidos, si existen
+    cargar_todo(hospital)  # Cargar datos persistidos
+    # Asegurar que el atributo de clase se sincronice con el de la instancia:
+    Hospital.habitaciones = hospital.habitaciones
     if DEBUG_MODE:
-        menu_inicial(hospital)  # Modo consola
+        menu_inicial(hospital)
     else:
         app = Aplicacion(hospital)
         app.mainloop()
