@@ -823,30 +823,62 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Éxito", f"Vacuna '{vacuna_seleccionada.nombre}' aplicada con éxito para la cédula {self.cedula}.")
 
     def facturacion(self, cedula):
-        from uiMain.main import facturacion
         try:
-            # Llamada a la función facturacion en main.py
-            facturacion(self.hospital, cedula)
-        except ErrorNoServiciosFacturables as e:
-            # Capturamos la excepción cuando el paciente no tiene servicios facturables
-            messagebox.showerror("Error de Facturación", str(e))
-        except Exception as e:
-            # Capturamos cualquier otra excepción no prevista
-            messagebox.showerror("Error", f"Ocurrió un error inesperado: {str(e)}")
+            cedula = int(cedula)
+        except ValueError:
+            messagebox.showerror("Error", "Cédula inválida.")
+            return
 
+        paciente = self.hospital.buscarPaciente(cedula)
+        if paciente is None:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
 
+        servicios = []  # Lista de tuplas (descripción, costo)
+        total = 0.0
 
+        # Agregar fórmulas médicas (si existen)
+        if hasattr(paciente, "historia_clinica") and hasattr(paciente.historia_clinica, "lista_formulas"):
+            for formula in paciente.historia_clinica.lista_formulas:
+                costo_formula = paciente.calcular_precio_formula(formula)
+                descripcion = f"FÓRMULA MÉDICA con Dr(a). {formula.doctor.nombre}"
+                servicios.append((descripcion, costo_formula))
+                total += costo_formula
 
+        # Agregar citas de vacunación (si existen)
+        if hasattr(paciente, "historia_clinica") and hasattr(paciente.historia_clinica, "historial_vacunas"):
+            for cita in paciente.historia_clinica.historial_vacunas:
+                costo_vacuna = paciente.calcular_precio_cita_vacuna(cita)
+                descripcion = f"Vacunación - {cita.vacuna.nombre} en fecha {cita.get_fecha()}"
+                servicios.append((descripcion, costo_vacuna))
+                total += costo_vacuna
 
+        # Agregar asignación de habitación (si existe)
+        if hasattr(paciente, "habitacion_asignada") and paciente.habitacion_asignada is not None:
+            costo_habitacion = paciente.calcular_precio_habitacion(paciente.habitacion_asignada)
+            descripcion = (f"Habitación #{paciente.habitacion_asignada.numero} - "
+                        f"{paciente.habitacion_asignada.categoria.name} "
+                        f"por {paciente.habitacion_asignada.dias} día(s)")
+            servicios.append((descripcion, costo_habitacion))
+            total += costo_habitacion
 
-        servicios, total = facturacion(self.hospital, cedula)
         if not servicios:
             messagebox.showinfo("Información", "No se encontraron servicios facturables para este paciente.")
             return
 
-        factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" for idx, (desc, costo) in enumerate(servicios)])
-        messagebox.showinfo("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}")
+        factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" 
+                                    for idx, (desc, costo) in enumerate(servicios)])
+        factura_info = (f"--- Facturación para {paciente.nombre} ---\n\n"
+                        f"Servicios facturados:\n{factura_detalle}\n\n"
+                        f"Total a pagar: {total}")
 
+        # Mostrar la factura en una ventana y preguntar si se desea pagar
+        proceder_pago = messagebox.askyesno("Factura Detallada", f"{factura_info}\n\n¿Desea proceder con el pago?")
+        if proceder_pago:
+            # Aquí se incluye la lógica de pago, si es necesaria.
+            messagebox.showinfo("Pago", "Pago realizado con éxito.")
+        else:
+            messagebox.showinfo("Pago", "Pago cancelado.")
     def ver_vacuna(self):
         self.actualizar_frame_contenido("Ver Información de Vacuna", "Seleccione la vacuna:", [])
         
