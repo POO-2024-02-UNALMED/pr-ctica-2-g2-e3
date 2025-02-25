@@ -1,7 +1,7 @@
 import sys
 import os
 
-DEBUG_MODE = True  # Cambiar a False para usar la GUI
+DEBUG_MODE = False  # Cambiar a False para usar la GUI
 
 # 1. Add the project root to sys.path FIRST
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
