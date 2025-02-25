@@ -5,6 +5,11 @@ import os
 from PIL import Image, ImageTk  # Importar Pillow
 from gestorAplicacion.administracion.Hospital import Hospital
 from gestorAplicacion.servicios.CitaVacuna import CitaVacuna
+from gestorAplicacion.servicios.Cita import Cita
+from gestorAplicacion.personas.Paciente import Paciente
+from gestorAplicacion.personas.Doctor import Doctor
+from gestorAplicacion.personas.Enfermedad import Enfermedad
+from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -189,6 +194,8 @@ class VentanaPrincipal(ttk.Frame):
             self.entry_cedula = ttk.Entry(self.frame_contenido)
             self.entry_cedula.pack(pady=5)
             ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula(titulo)).pack(pady=5)
+        elif titulo.startswith("Gestionar"):
+            pass
         else:
             frame_tabla = ttk.Frame(self.frame_contenido)
             frame_tabla.pack(pady=5)
