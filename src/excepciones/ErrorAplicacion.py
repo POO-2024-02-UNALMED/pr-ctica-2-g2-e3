@@ -40,20 +40,17 @@ class ErrorPacienteNoEncontrado(ErrorRegistro):
 
 
 
-# src/ErrorAplicacion.py
+# ERRORENTRADA
 
-class ErrorCita(ErrorAplicacion):
-    pass
-
-class ErrorCitaNoDisponible(ErrorCita):
-    def __init__(self, fecha: str):
-        super().__init__(f"La cita para la fecha {fecha} no está disponible.")
-
-class ErrorCitaYaAsignada(ErrorCita):
-    def __init__(self, fecha: str):
-        super().__init__(f"La cita para la fecha {fecha} ya ha sido asignada a otro paciente.")
-
-# Excepción sugerida:
-class IndexErrorCita(ErrorCita):
+class ErrorEntrada(ErrorAplicacion):
     def __init__(self, mensaje: str):
-        super().__init__(f"Índice fuera de rango: {mensaje}")
+        super().__init__(f"Error en la entrada por teclado: {mensaje}")
+
+class ErrorCampoVacio(ErrorEntrada):
+    def __init__(self, campo: str):
+        super().__init__(f"El campo '{campo}' no puede estar vacío.")
+
+class ErrorTipoDatoIncorrecto(ErrorEntrada):
+    def __init__(self, campo: str, tipo_esperado: str, tipo_ingresado: str):
+        super().__init__(f"Se esperaba un valor de tipo '{tipo_esperado}' en el campo '{campo}', pero se ingresó un valor de tipo '{tipo_ingresado}'.")
+
