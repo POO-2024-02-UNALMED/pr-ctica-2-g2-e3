@@ -116,7 +116,7 @@ class Paciente(Persona):
     def calcular_precio_habitacion(self, habitacion_asignada) -> float:
         # Se accede directamente al atributo 'tipo_eps' en lugar de llamar a un método inexistente.
         if self.tipo_eps == "Subsidiado":
-            precio = habitacion_asignada.categoria.get_valor() * 0
+            precio = habitacion_asignada.categoria.get_valor() * 0.3
         elif self.tipo_eps == "Contributivo":
             precio = (habitacion_asignada.categoria.get_valor() / 2) * habitacion_asignada.dias
         else:  # Particular

@@ -946,6 +946,15 @@ def registrar_paciente(hospital: Hospital):
     eps = input("Ingrese su tipo de EPS ('Subsidiado', 'Contributivo' o 'Particular'): ")
     try:
         paciente = Paciente(int(id_paciente), nombre, eps)
+        # Inicializar la historia clínica completa
+        from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
+        paciente.historia_clinica = HistoriaClinica(paciente)
+        # Opcional: asegurar que se inicialicen las listas
+        if not hasattr(paciente.historia_clinica, "lista_formulas"):
+            paciente.historia_clinica.lista_formulas = []
+        if not hasattr(paciente.historia_clinica, "historial_vacunas"):
+            paciente.historia_clinica.historial_vacunas = []
+            
         hospital.lista_pacientes.append(paciente)
         print("Paciente registrado con éxito.")
     except ValueError:
