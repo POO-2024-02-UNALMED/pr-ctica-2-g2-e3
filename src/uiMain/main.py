@@ -1,7 +1,7 @@
 import sys
 import os
 
-DEBUG_MODE = False  # Cambiar a False para usar la GUI
+DEBUG_MODE = True  # Cambiar a False para usar la GUI
 
 # 1. Add the project root to sys.path FIRST
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -946,6 +946,15 @@ def registrar_paciente(hospital: Hospital):
     eps = input("Ingrese su tipo de EPS ('Subsidiado', 'Contributivo' o 'Particular'): ")
     try:
         paciente = Paciente(int(id_paciente), nombre, eps)
+        # Inicializar la historia clínica completa
+        from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
+        paciente.historia_clinica = HistoriaClinica(paciente)
+        # Opcional: asegurar que se inicialicen las listas
+        if not hasattr(paciente.historia_clinica, "lista_formulas"):
+            paciente.historia_clinica.lista_formulas = []
+        if not hasattr(paciente.historia_clinica, "historial_vacunas"):
+            paciente.historia_clinica.historial_vacunas = []
+            
         hospital.lista_pacientes.append(paciente)
         print("Paciente registrado con éxito.")
     except ValueError:
