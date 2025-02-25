@@ -210,9 +210,9 @@ def agendar_citas(hospital: Hospital, cedula: str = None):
         estado = "Disponible" if cita.paciente is None else "Asignada"
         print(f"{idx}. {cita.fecha} - {estado}")
 
-def formula_medica(hospital: Hospital):
-    # Solicitar y validar la cédula del paciente
-    cedula = input("Ingrese la cédula del paciente: ")
+def formula_medica(hospital: Hospital, cedula: str = None):
+    if not cedula:
+        cedula = input("Ingrese la cédula del paciente: ")
     try:
         cedula = int(cedula)
     except ValueError:
@@ -248,7 +248,6 @@ def formula_medica(hospital: Hospital):
     enfermedad_tratar = paciente.historia_clinica.enfermedades[opcion - 1]
 
     # Buscar doctores con la especialidad que corresponde a la enfermedad.
-    # En lugar de hospital.buscar_tipo_doctor, se utiliza una lista por comprensión.
     doctores_cita = [doc for doc in hospital.lista_doctores if doc.especialidad == enfermedad_tratar.especialidad]
     if not doctores_cita:
         print("Ahora no contamos con doctores para tratar esta enfermedad. Lo sentimos mucho.")
@@ -324,13 +323,19 @@ def formula_medica(hospital: Hospital):
     print(formula_paciente)
     print(f"Precio total de la fórmula: {precio_total}")
 
-
-def asignar_habitacion(hospital: Hospital):
-    try:
-        cedula = int(input("Ingrese el número de identificación del paciente: "))
-    except ValueError:
-        print("Cédula inválida.")
-        return
+def asignar_habitacion(hospital: Hospital, cedula: str = None):
+    if not cedula:
+        try:
+            cedula = int(input("Ingrese el número de identificación del paciente: "))
+        except ValueError:
+            print("Cédula inválida.")
+            return
+    else:
+        try:
+            cedula = int(cedula)
+        except ValueError:
+            print("Cédula inválida.")
+            return
 
     paciente = hospital.buscarPaciente(cedula)
     if not paciente:
@@ -381,14 +386,20 @@ def asignar_habitacion(hospital: Hospital):
     print(f"Días de hospedaje: {dias}")
     print(f"Costo total: {costo_total}")
 
+def vacunacion(hospital: Hospital, cedula: str = None):
+    if not cedula:
+        try:
+            cedula = int(input("Ingrese la cédula del paciente: "))
+        except ValueError:
+            print("Cédula inválida.")
+            return
+    else:
+        try:
+            cedula = int(cedula)
+        except ValueError:
+            print("Cédula inválida.")
+            return
 
-def vacunacion(hospital: Hospital):
-    # Solicitar la cédula del paciente y buscarlo
-    try:
-        cedula = int(input("Ingrese la cédula del paciente: "))
-    except ValueError:
-        print("Cédula inválida.")
-        return
     paciente = hospital.buscarPaciente(cedula)
     if paciente is None:
         print("Paciente no encontrado.")
@@ -484,14 +495,20 @@ def vacunacion(hospital: Hospital):
         print("\nHistorial de vacunas aplicadas:")
         for idx, cv in enumerate(paciente.historia_clinica.historial_vacunas, start=1):
             print(f"{idx}. Fecha: {cv.get_fecha()}, Vacuna: {cv.vacuna.nombre}")
-    
-def facturacion(hospital: Hospital):
-    # Solicitar la cédula del paciente y buscarlo
-    try:
-        cedula = int(input("Ingrese la cédula del paciente para facturación: "))
-    except ValueError:
-        print("Cédula inválida.")
-        return
+
+def facturacion(hospital: Hospital, cedula: str = None):
+    if not cedula:
+        try:
+            cedula = int(input("Ingrese la cédula del paciente para facturación: "))
+        except ValueError:
+            print("Cédula inválida.")
+            return
+    else:
+        try:
+            cedula = int(cedula)
+        except ValueError:
+            print("Cédula inválida.")
+            return
 
     paciente = hospital.buscarPaciente(cedula)
     if paciente is None:

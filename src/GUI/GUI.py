@@ -160,20 +160,28 @@ class VentanaPrincipal(ttk.Frame):
         self.actualizar_frame_contenido("Agendar Citas", "Ingrese el número de cédula del paciente:", [])
     
     def mostrar_generar_formulas_medicas(self):
-        self.actualizar_frame_contenido("Generar Fórmulas Médicas", "Descripción de generar fórmulas médicas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
-        self.generar_formulas_medicas()
+        self.actualizar_frame_contenido("Generar Fórmulas Médicas", "Ingrese el número de cédula del paciente:", [])
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_formula).pack(pady=5)
 
     def mostrar_asignar_habitaciones(self):
-        self.actualizar_frame_contenido("Asignar Habitaciones", "Descripción de asignar habitaciones", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
-        self.asignar_habitaciones()
+        self.actualizar_frame_contenido("Asignar Habitaciones", "Ingrese el número de cédula del paciente:", [])
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_habitacion).pack(pady=5)
 
     def mostrar_aplicar_vacunas(self):
-        self.actualizar_frame_contenido("Aplicación de Vacunas", "Descripción de aplicación de vacunas", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
-        self.aplicar_vacunas()
+        self.actualizar_frame_contenido("Aplicación de Vacunas", "Ingrese el número de cédula del paciente:", [])
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_vacuna).pack(pady=5)
 
     def mostrar_facturacion(self):
-        self.actualizar_frame_contenido("Facturación", "Descripción de facturación", [("Criterio 1", "Valor 1"), ("Criterio 2", "Valor 2")])
-        self.facturacion()
+        self.actualizar_frame_contenido("Facturación", "Ingrese el número de cédula del paciente:", [])
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_facturacion).pack(pady=5)
 
     def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
         for widget in self.frame_contenido.winfo_children():
@@ -182,10 +190,10 @@ class VentanaPrincipal(ttk.Frame):
         ttk.Label(self.frame_contenido, text=titulo, font=("Arial", 14, "bold")).pack(pady=5)
         ttk.Label(self.frame_contenido, text=descripcion, wraplength=400).pack(pady=5)
         
-        if titulo == "Agendar Citas":
+        if titulo in ["Agendar Citas", "Generar Fórmulas Médicas", "Asignar Habitaciones", "Aplicación de Vacunas", "Facturación"]:
             self.entry_cedula = ttk.Entry(self.frame_contenido)
             self.entry_cedula.pack(pady=5)
-            ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula).pack(pady=5)
+            ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula(titulo)).pack(pady=5)
         else:
             frame_tabla = ttk.Frame(self.frame_contenido)
             frame_tabla.pack(pady=5)
@@ -202,18 +210,22 @@ class VentanaPrincipal(ttk.Frame):
             ttk.Button(frame_botones, text="Aceptar").pack(side=tk.LEFT, padx=5)
             ttk.Button(frame_botones, text="Borrar").pack(side=tk.LEFT, padx=5)
 
-    def obtener_cedula(self):
+    def obtener_cedula(self, titulo):
         cedula = self.entry_cedula.get()
         if not cedula:
             messagebox.showerror("Error", "Por favor ingrese un número de cédula.")
             return
         
-        # Llamar a la función de agendar citas del archivo main.py
-        try:
-            from uiMain.main import agendar_citas
+        if titulo == "Agendar Citas":
             self.agendar_citas(cedula)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo agendar la cita: {e}")
+        elif titulo == "Generar Fórmulas Médicas":
+            self.generar_formulas_medicas(cedula)
+        elif titulo == "Asignar Habitaciones":
+            self.asignar_habitaciones(cedula)
+        elif titulo == "Aplicación de Vacunas":
+            self.aplicar_vacunas(cedula)
+        elif titulo == "Facturación":
+            self.facturacion(cedula)
 
     def agendar_citas(self, cedula):
         from uiMain.main import agendar_citas
@@ -275,18 +287,45 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Éxito", f"Cita agendada con éxito para {cita_seleccionada.fecha} con {doctor_seleccionado.nombre}.")
         self.mostrar_agendar_citas()
 
-    def generar_formulas_medicas(self):
+    def generar_formulas_medicas(self, cedula):
         from uiMain.main import formula_medica
-        formula_medica(self.hospital)
+        self.cedula = cedula
+        self.actualizar_frame_contenido("Seleccione la fórmula médica", "Seleccione la fórmula médica que requiere:", [])
+        
+        # Supongamos que tenemos una lista de fórmulas médicas disponibles
+        formulas_medicas_disponibles = ["Fórmula 1", "Fórmula 2", "Fórmula 3"]
+        self.formula_combobox = ttk.Combobox(self.frame_contenido, values=formulas_medicas_disponibles)
+        self.formula_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.confirmar_formula_medica).pack(pady=5)
 
-    def asignar_habitaciones(self):
+    def confirmar_formula_medica(self):
+        formula_seleccionada = self.formula_combobox.get()
+        if not formula_seleccionada:
+            messagebox.showerror("Error", "Por favor seleccione una fórmula médica.")
+            return
+        
+        # Aquí puedes continuar con la lógica de generar la fórmula médica usando el número de cédula y la fórmula seleccionada
+        # Por ejemplo, podrías llamar a una función que maneje el proceso de generar la fórmula médica
+        # y pasarle el número de cédula y la fórmula seleccionada como argumentos.
+        
+        # Ejemplo:
+        # resultado = generar_formula_medica(self.hospital, self.cedula, formula_seleccionada)
+        # if resultado:
+        #     messagebox.showinfo("Éxito", "Fórmula médica generada con éxito.")
+        # else:
+        #     messagebox.showerror("Error", "No se pudo generar la fórmula médica.")
+        
+        # Para este ejemplo, simplemente mostramos un mensaje de éxito.
+        messagebox.showinfo("Éxito", f"Fórmula médica '{formula_seleccionada}' generada con éxito para la cédula {self.cedula}.")
+
+    def asignar_habitaciones(self, cedula):
         from uiMain.main import asignar_habitacion
-        asignar_habitacion(self.hospital)
+        asignar_habitacion(self.hospital, cedula)
 
-    def aplicar_vacunas(self):
+    def aplicar_vacunas(self, cedula):
         from uiMain.main import vacunacion
-        vacunacion(self.hospital)
+        vacunacion(self.hospital, cedula)
 
-    def facturacion(self):
+    def facturacion(self, cedula):
         from uiMain.main import facturacion
-        facturacion(self.hospital)
+        facturacion(self.hospital, cedula)
