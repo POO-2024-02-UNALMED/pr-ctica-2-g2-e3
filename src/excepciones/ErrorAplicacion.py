@@ -48,7 +48,8 @@ class ErrorEntrada(ErrorAplicacion):
 
 class ErrorCampoVacio(ErrorEntrada):
     def __init__(self, campo: str):
-        super().__init__(f"El campo '{campo}' no puede estar vacío.")
+        self.message = f"El campo {campo} no puede estar vacío."
+        super().__init__(self.message)
 
 class ErrorTipoDatoIncorrecto(ErrorEntrada):
     def __init__(self, campo: str, tipo_esperado: str, tipo_ingresado: str):
