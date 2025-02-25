@@ -22,7 +22,6 @@ from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
 from excepciones.ErrorAplicacion import ErrorNoServiciosFacturables
 from excepciones.ErrorAplicacion import ErrorCampoVacio
-from excepciones.ErrorAplicacion import ErrorTipoDatoIncorrecto
 
 
 class Inicio(ttk.Frame):
