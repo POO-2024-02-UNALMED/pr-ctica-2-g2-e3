@@ -214,7 +214,7 @@ class VentanaPrincipal(ttk.Frame):
         
         self.entry_cedula = ttk.Entry(self.frame_contenido)
         self.entry_cedula.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula("Facturación")).pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.obtener_cedula_facturacion).pack(pady=5)
 
     def obtener_cedula_facturacion(self):
         cedula = self.entry_cedula.get()
@@ -248,14 +248,14 @@ class VentanaPrincipal(ttk.Frame):
             return
 
         factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" for idx, (desc, costo) in enumerate(servicios)])
-        self.actualizar_frame_contenido("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}")
+        self.actualizar_frame_contenido("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}", [])
 
         ttk.Button(self.frame_contenido, text="Pagar", command=lambda: self.realizar_pago(total)).pack(pady=5)
 
     def realizar_pago(self, total):
         messagebox.showinfo("Pago Exitoso", f"Pago de {total} realizado con éxito.")
 
-    def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores=[]):
+    def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
         for widget in self.frame_contenido.winfo_children():
             widget.destroy()
         
