@@ -624,31 +624,113 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Éxito", f"Cita agendada con éxito para {cita_seleccionada.fecha} con {doctor_seleccionado.nombre}.")
         self.mostrar_agendar_citas()
 
+
+    
     def generar_formulas_medicas(self, cedula):
-        from uiMain.main import formula_medica
         self.cedula = cedula
-        self.actualizar_frame_contenido("Seleccione la fórmula médica", "Seleccione la fórmula médica que requiere:", [])
-        
-        # Obtener las opciones de fórmulas médicas desde la lógica del programa
         paciente = self.hospital.buscarPaciente(int(cedula))
         if not paciente:
             messagebox.showerror("Error", "Paciente no encontrado.")
             return
-        
-        if not paciente.historia_clinica.enfermedades:
+        if not hasattr(paciente, "historia_clinica") or not paciente.historia_clinica.enfermedades:
             messagebox.showerror("Error", "No hay enfermedades registradas. Diríjase a la opción de registrar enfermedad.")
             return
         
-        enfermedades_disponibles = [f"{enfermedad.nombre} - {enfermedad.tipologia}" for enfermedad in paciente.historia_clinica.enfermedades]
-        self.formula_combobox = ttk.Combobox(self.frame_contenido, values=enfermedades_disponibles)
-        self.formula_combobox.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=self.confirmar_formula_medica).pack(pady=5)
-
-    def confirmar_formula_medica(self):
-        formula_seleccionada = self.formula_combobox.get()
-        if not formula_seleccionada:
-            messagebox.showerror("Error", "Por favor seleccione una fórmula médica.")
+        # Paso 1: Elegir la enfermedad a tratar
+        self.actualizar_frame_contenido("Generar Fórmula Médica", "Seleccione la enfermedad a tratar:", [])
+        enfermedades_disponibles = [f"{idx+1}. {enfermedad.nombre} - {enfermedad.tipologia}" 
+                                    for idx, enfermedad in enumerate(paciente.historia_clinica.enfermedades)]
+        self.enfermedad_combobox = ttk.Combobox(self.frame_contenido, values=enfermedades_disponibles, state="readonly")
+        self.enfermedad_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Siguiente", command=self.seleccionar_enfermedad).pack(pady=5)
+    
+    def seleccionar_enfermedad(self):
+        seleccion = self.enfermedad_combobox.get()
+        if not seleccion:
+            messagebox.showerror("Error", "Debe seleccionar una enfermedad.")
             return
+        # Suponiendo que el formato es "índice. nombre - tipología"
+        try:
+            idx = int(seleccion.split('.')[0]) - 1
+        except Exception as e:
+            messagebox.showerror("Error", "Selección de enfermedad inválida.")
+            return
+        
+        paciente = self.hospital.buscarPaciente(int(self.cedula))
+        self.enfermedad_seleccionada = paciente.historia_clinica.enfermedades[idx]
+        
+        # Paso 2: Seleccionar el doctor (filtrar por tipología de la enfermedad)
+        doctores_disponibles = [doc for doc in self.hospital.lista_doctores if doc.especialidad == self.enfermedad_seleccionada.tipologia]
+        if not doctores_disponibles:
+            messagebox.showerror("Error", f"No hay doctores disponibles para la especialidad {self.enfermedad_seleccionada.tipologia}.")
+            return
+        
+        self.actualizar_frame_contenido("Generar Fórmula Médica", 
+                                        f"Doctor(es) disponibles para tratar {self.enfermedad_seleccionada.nombre} ({self.enfermedad_seleccionada.tipologia}):", [])
+        self.doctor_combobox = ttk.Combobox(self.frame_contenido, 
+                                             values=[f"{idx+1}. {doc.nombre}" for idx, doc in enumerate(doctores_disponibles)],
+                                             state="readonly")
+        self.doctor_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Siguiente", command=lambda: self.seleccionar_doctor(doctores_disponibles)).pack(pady=5)
+    
+    def seleccionar_doctor(self, doctores_disponibles):
+        seleccion = self.doctor_combobox.get()
+        if not seleccion:
+            messagebox.showerror("Error", "Debe seleccionar un doctor.")
+            return
+        try:
+            idx = int(seleccion.split('.')[0]) - 1
+        except Exception as e:
+            messagebox.showerror("Error", "Selección de doctor inválida.")
+            return
+        
+        self.doctor_seleccionado = doctores_disponibles[idx]
+        
+        # Paso 3: Seleccionar medicamentos (se puede agregar más de uno)
+        self.medicamentos_seleccionados = []
+        self.actualizar_frame_contenido("Generar Fórmula Médica", 
+                                        f"Medicamentos disponibles para tratar {self.enfermedad_seleccionada.nombre}:", [])
+        # Filtrar medicamentos; por ejemplo, se muestran todos o se filtran por enfermedad si aplica.
+        self.medicamentos_disponibles = self.hospital.lista_medicamentos  
+        self.medicamento_combobox = ttk.Combobox(self.frame_contenido, 
+                                                 values=[f"{idx+1}. {med.nombre}" for idx, med in enumerate(self.medicamentos_disponibles)],
+                                                 state="readonly")
+        self.medicamento_combobox.pack(pady=5)
+        frame_botones = ttk.Frame(self.frame_contenido)
+        frame_botones.pack(pady=5)
+        ttk.Button(frame_botones, text="Agregar Medicamento", command=self.agregar_medicamento).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_botones, text="Terminar", command=self.confirmar_formula_final).pack(side=tk.LEFT, padx=5)
+        # Mostrar lista de medicamentos seleccionados
+        self.label_meds = ttk.Label(self.frame_contenido, text="Medicamentos agregados: Ninguno")
+        self.label_meds.pack(pady=5)
+    
+    def agregar_medicamento(self):
+        seleccion = self.medicamento_combobox.get()
+        if not seleccion:
+            messagebox.showerror("Error", "Debe seleccionar un medicamento.")
+            return
+        try:
+            idx = int(seleccion.split('.')[0]) - 1
+        except Exception as e:
+            messagebox.showerror("Error", "Selección de medicamento inválida.")
+            return
+        medicamento = self.medicamentos_disponibles[idx]
+        self.medicamentos_seleccionados.append(medicamento)
+        messagebox.showinfo("Éxito", f"Medicamento '{medicamento.nombre}' agregado.")
+        # Actualizar la etiqueta con la lista de medicamentos seleccionados
+        meds_str = ", ".join([med.nombre for med in self.medicamentos_seleccionados])
+        self.label_meds.config(text=f"Medicamentos agregados: {meds_str}")
+    
+    def confirmar_formula_final(self):
+        # Calcular costo total: por ejemplo, sumar los precios de los medicamentos
+        total = sum(med.precio for med in self.medicamentos_seleccionados)
+        paciente = self.hospital.buscarPaciente(int(self.cedula))
+        formula_text = (f"FÓRMULA MÉDICA GENERADA:\n"
+                        f"Fórmula para {paciente.nombre}, Doctor: {self.doctor_seleccionado.nombre},\n"
+                        f"Medicamentos: {', '.join([med.nombre for med in self.medicamentos_seleccionados])}\n"
+                        f"Precio total de la fórmula: {total}")
+        messagebox.showinfo("Fórmula Médica", formula_text)
+        # Aquí se podría guardar la fórmula en la historia clínica u otra estructura según lo requiera la lógica del programa.
         
         messagebox.showinfo("Éxito", f"Fórmula médica '{formula_seleccionada}' generada con éxito para la cédula {self.cedula}.")
 
