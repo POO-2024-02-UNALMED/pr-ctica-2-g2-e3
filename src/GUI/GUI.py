@@ -140,8 +140,8 @@ class VentanaPrincipal(ttk.Frame):
         
         menu_gestion = Menu(self.menu_bar, tearoff=0)
         menu_gestion.add_command(label="Gestionar Pacientes", command=self.mostrar_gestion_pacientes)
-        menu_gestion.add_command(label="Gestionar Vacunas", command=self.mostrar_gestion_vacunas)
         menu_gestion.add_command(label="Gestionar Doctores", command=self.mostrar_gestion_doctores)
+        menu_gestion.add_command(label="Gestionar Vacunas", command=self.mostrar_gestion_vacunas)
         menu_gestion.add_command(label="Gestionar Hospital", command=self.mostrar_gestion_hospital)
         
         menu_ayuda = Menu(self.menu_bar, tearoff=0)
@@ -177,7 +177,45 @@ class VentanaPrincipal(ttk.Frame):
     
     def mostrar_facturacion(self):
         self.actualizar_frame_contenido("Facturación", "Ingrese el número de cédula del paciente:", [])
-    
+
+    def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
+        for widget in self.frame_contenido.winfo_children():
+            widget.destroy()
+        
+        ttk.Label(self.frame_contenido, text=titulo, font=("Arial", 14, "bold")).pack(pady=5)
+        ttk.Label(self.frame_contenido, text=descripcion, wraplength=400).pack(pady=5)
+        
+        if titulo in ["Agendar Citas", "Generar Fórmulas Médicas", "Asignar Habitaciones", "Aplicación de Vacunas", "Facturación"]:
+            self.entry_cedula = ttk.Entry(self.frame_contenido)
+            self.entry_cedula.pack(pady=5)
+            ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula(titulo)).pack(pady=5)
+        else:
+            frame_tabla = ttk.Frame(self.frame_contenido)
+            frame_tabla.pack(pady=5)
+            
+            for criterio, valor in criterios_valores:
+                fila = ttk.Frame(frame_tabla)
+                fila.pack(fill=tk.X, pady=2)
+                ttk.Label(fila, text=criterio, width=20).pack(side=tk.LEFT)
+                ttk.Label(fila, text=valor, width=20).pack(side=tk.LEFT)
+
+    def obtener_cedula(self, titulo):
+        cedula = self.entry_cedula.get()
+        if not cedula:
+            messagebox.showerror("Error", "Por favor ingrese un número de cédula.")
+            return
+        
+        if titulo == "Agendar Citas":
+            self.agendar_citas(cedula)
+        elif titulo == "Generar Fórmulas Médicas":
+            self.generar_formulas_medicas(cedula)
+        elif titulo == "Asignar Habitaciones":
+            self.asignar_habitaciones(cedula)
+        elif titulo == "Aplicación de Vacunas":
+            self.aplicar_vacunas(cedula)
+        elif titulo == "Facturación":
+            self.facturacion(cedula)
+
     def mostrar_gestion_pacientes(self):
         self.actualizar_frame_contenido("Gestionar Pacientes", "Seleccione una opción:", [])
         opciones_pacientes = ["Registrar Paciente", "Registrar Enfermedad", "Eliminar Paciente", "Ver Paciente"]
@@ -190,36 +228,85 @@ class VentanaPrincipal(ttk.Frame):
         if opcion == "Registrar Paciente":
             self.registrar_paciente()
         elif opcion == "Registrar Enfermedad":
-            self.registrar_nueva_enfermedad()
+            self.registrar_enfermedad()
         elif opcion == "Eliminar Paciente":
             self.eliminar_paciente()
         elif opcion == "Ver Paciente":
             self.ver_paciente()
-        else:
-            messagebox.showerror("Error", "Opción inválida.")
-    
-    def mostrar_gestion_vacunas(self):
-        self.actualizar_frame_contenido("Gestionar Vacunas", "Seleccione una opción:", [])
-        opciones_vacunas = ["Registrar Vacuna", "Eliminar Vacuna", "Ver Información de Vacuna", "Agregar Cita a Vacuna", "Eliminar Cita de Vacuna"]
-        self.gestion_vacunas_combobox = ttk.Combobox(self.frame_contenido, values=opciones_vacunas)
-        self.gestion_vacunas_combobox.pack(pady=5)
-        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_gestion_vacunas).pack(pady=5)
-    
-    def seleccionar_gestion_vacunas(self):
-        opcion = self.gestion_vacunas_combobox.get()
-        if opcion == "Registrar Vacuna":
-            self.registrar_vacuna()
-        elif opcion == "Eliminar Vacuna":
-            self.eliminar_vacuna()
-        elif opcion == "Ver Información de Vacuna":
-            self.ver_vacuna()
-        elif opcion == "Agregar Cita a Vacuna":
-            self.agregar_cita_vacuna()
-        elif opcion == "Eliminar Cita de Vacuna":
-            self.eliminar_cita_vacuna()
-        else:
-            messagebox.showerror("Error", "Opción inválida.")
-    
+
+    def registrar_paciente(self):
+        self.actualizar_frame_contenido("Registrar Paciente", "Ingrese los datos del paciente:", [])
+        self.entry_nombre = ttk.Entry(self.frame_contenido)
+        self.entry_nombre.pack(pady=5)
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        self.entry_eps = ttk.Entry(self.frame_contenido)
+        self.entry_eps.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Registrar", command=self.confirmar_registro_paciente).pack(pady=5)
+
+    def confirmar_registro_paciente(self):
+        nombre = self.entry_nombre.get()
+        cedula = self.entry_cedula.get()
+        eps = self.entry_eps.get()
+        try:
+            paciente = Paciente(int(cedula), nombre, eps)
+            self.hospital.lista_pacientes.append(paciente)
+            messagebox.showinfo("Éxito", "Paciente registrado con éxito.")
+        except ValueError:
+            messagebox.showerror("Error", "El número de cédula debe ser un valor numérico.")
+
+    def registrar_enfermedad(self):
+        self.actualizar_frame_contenido("Registrar Enfermedad", "Ingrese los datos de la enfermedad:", [])
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        self.entry_enfermedad = ttk.Entry(self.frame_contenido)
+        self.entry_enfermedad.pack(pady=5)
+        self.entry_tipologia = ttk.Entry(self.frame_contenido)
+        self.entry_tipologia.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Registrar", command=self.confirmar_registro_enfermedad).pack(pady=5)
+
+    def confirmar_registro_enfermedad(self):
+        cedula = self.entry_cedula.get()
+        enfermedad_nombre = self.entry_enfermedad.get()
+        tipologia = self.entry_tipologia.get()
+        try:
+            cedula = int(cedula)
+            paciente = self.hospital.buscarPaciente(cedula)
+            if not paciente:
+                messagebox.showerror("Error", "Paciente no encontrado.")
+                return
+            nueva_enfermedad = Enfermedad(tipologia, enfermedad_nombre, tipologia)
+            if not hasattr(paciente, "historia_clinica") or paciente.historia_clinica is None:
+                paciente.historia_clinica = HistoriaClinica(paciente)
+            if not hasattr(paciente.historia_clinica, "enfermedades") or paciente.historia_clinica.enfermedades is None:
+                paciente.historia_clinica.enfermedades = []
+            paciente.historia_clinica.enfermedades.append(nueva_enfermedad)
+            messagebox.showinfo("Éxito", "Nueva enfermedad registrada exitosamente para el paciente.")
+        except ValueError:
+            messagebox.showerror("Error", "La cédula debe ser un número entero.")
+
+    def eliminar_paciente(self):
+        self.actualizar_frame_contenido("Eliminar Paciente", "Seleccione el paciente a eliminar:", [])
+        pacientes_opciones = [f"{paciente.nombre} - {paciente.cedula}" for paciente in self.hospital.lista_pacientes]
+        self.paciente_combobox = ttk.Combobox(self.frame_contenido, values=pacientes_opciones)
+        self.paciente_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Eliminar", command=self.confirmar_eliminar_paciente).pack(pady=5)
+
+    def confirmar_eliminar_paciente(self):
+        paciente_seleccionado_desc = self.paciente_combobox.get()
+        paciente_seleccionado = next((paciente for paciente in self.hospital.lista_pacientes if f"{paciente.nombre} - {paciente.cedula}" == paciente_seleccionado_desc), None)
+        if not paciente_seleccionado:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+        self.hospital.lista_pacientes.remove(paciente_seleccionado)
+        messagebox.showinfo("Éxito", "Paciente eliminado con éxito.")
+
+    def ver_paciente(self):
+        self.actualizar_frame_contenido("Ver Paciente", "Lista de pacientes registrados:", [])
+        pacientes_opciones = [f"{paciente.nombre} - {paciente.cedula}" for paciente in self.hospital.lista_pacientes]
+        for paciente in pacientes_opciones:
+            ttk.Label(self.frame_contenido, text=paciente).pack(pady=2)
+
     def mostrar_gestion_doctores(self):
         self.actualizar_frame_contenido("Gestionar Doctores", "Seleccione una opción:", [])
         opciones_doctores = ["Registrar Doctor", "Eliminar Doctor", "Ver Doctor", "Agregar Citas", "Eliminar Citas"]
@@ -239,6 +326,127 @@ class VentanaPrincipal(ttk.Frame):
             self.agregar_citas()
         elif opcion == "Eliminar Citas":
             self.eliminar_citas()
+
+    def registrar_doctor(self):
+        self.actualizar_frame_contenido("Registrar Doctor", "Ingrese los datos del doctor:", [])
+        self.entry_nombre = ttk.Entry(self.frame_contenido)
+        self.entry_nombre.pack(pady=5)
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        self.entry_eps = ttk.Entry(self.frame_contenido)
+        self.entry_eps.pack(pady=5)
+        self.entry_especialidad = ttk.Entry(self.frame_contenido)
+        self.entry_especialidad.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Registrar", command=self.confirmar_registro_doctor).pack(pady=5)
+
+    def confirmar_registro_doctor(self):
+        nombre = self.entry_nombre.get()
+        cedula = self.entry_cedula.get()
+        eps = self.entry_eps.get()
+        especialidad = self.entry_especialidad.get()
+        try:
+            doctor = Doctor(int(cedula), nombre, eps, especialidad)
+            self.hospital.lista_doctores.append(doctor)
+            messagebox.showinfo("Éxito", "Doctor registrado con éxito.")
+        except ValueError:
+            messagebox.showerror("Error", "El número de cédula debe ser un valor numérico.")
+
+    def eliminar_doctor(self):
+        self.actualizar_frame_contenido("Eliminar Doctor", "Seleccione el doctor a eliminar:", [])
+        doctores_opciones = [f"{doctor.nombre} - {doctor.cedula}" for doctor in self.hospital.lista_doctores]
+        self.doctor_combobox = ttk.Combobox(self.frame_contenido, values=doctores_opciones)
+        self.doctor_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Eliminar", command=self.confirmar_eliminar_doctor).pack(pady=5)
+
+    def confirmar_eliminar_doctor(self):
+        doctor_seleccionado_desc = self.doctor_combobox.get()
+        doctor_seleccionado = next((doctor for doctor in self.hospital.lista_doctores if f"{doctor.nombre} - {doctor.cedula}" == doctor_seleccionado_desc), None)
+        if not doctor_seleccionado:
+            messagebox.showerror("Error", "Doctor no encontrado.")
+            return
+        self.hospital.lista_doctores.remove(doctor_seleccionado)
+        messagebox.showinfo("Éxito", "Doctor eliminado con éxito.")
+
+    def ver_doctor(self):
+        self.actualizar_frame_contenido("Ver Doctor", "Lista de doctores registrados:", [])
+        doctores_opciones = [f"{doctor.nombre} - {doctor.cedula}" for doctor in self.hospital.lista_doctores]
+        for doctor in doctores_opciones:
+            ttk.Label(self.frame_contenido, text=doctor).pack(pady=2)
+
+    def agregar_citas(self):
+        self.actualizar_frame_contenido("Agregar Citas", "Ingrese los datos de la cita:", [])
+        self.entry_cedula = ttk.Entry(self.frame_contenido)
+        self.entry_cedula.pack(pady=5)
+        self.entry_fecha = ttk.Entry(self.frame_contenido)
+        self.entry_fecha.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Agregar", command=self.confirmar_agregar_citas).pack(pady=5)
+
+    def confirmar_agregar_citas(self):
+        cedula = self.entry_cedula.get()
+        fecha = self.entry_fecha.get()
+        try:
+            cedula = int(cedula)
+            doctor = self.hospital.buscar_doctor(cedula)
+            if not doctor:
+                messagebox.showerror("Error", "Doctor no encontrado.")
+                return
+            nueva_cita = Cita(doctor, fecha, None)
+            doctor.agenda.append(nueva_cita)
+            messagebox.showinfo("Éxito", "Cita agregada con éxito.")
+        except ValueError:
+            messagebox.showerror("Error", "El número de cédula debe ser un valor numérico.")
+
+    def eliminar_citas(self):
+        self.actualizar_frame_contenido("Eliminar Citas", "Seleccione la cita a eliminar:", [])
+        doctores_opciones = [f"{doctor.nombre} - {doctor.cedula}" for doctor in self.hospital.lista_doctores]
+        self.doctor_combobox = ttk.Combobox(self.frame_contenido, values=doctores_opciones)
+        self.doctor_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Seleccionar Doctor", command=self.seleccionar_doctor_para_eliminar_citas).pack(pady=5)
+
+    def seleccionar_doctor_para_eliminar_citas(self):
+        doctor_seleccionado_desc = self.doctor_combobox.get()
+        doctor_seleccionado = next((doctor for doctor in self.hospital.lista_doctores if f"{doctor.nombre} - {doctor.cedula}" == doctor_seleccionado_desc), None)
+        if not doctor_seleccionado:
+            messagebox.showerror("Error", "Doctor no encontrado.")
+            return
+        citas_disponibles = [cita for cita in doctor_seleccionado.agenda if cita.paciente is None]
+        if not citas_disponibles:
+            messagebox.showerror("Error", "No hay citas disponibles para eliminar.")
+            return
+        self.actualizar_frame_contenido("Eliminar Citas", "Seleccione la cita a eliminar:", [])
+        citas_opciones = [f"{cita.fecha}" for cita in citas_disponibles]
+        self.cita_combobox = ttk.Combobox(self.frame_contenido, values=citas_opciones)
+        self.cita_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Eliminar", command=lambda: self.confirmar_eliminar_citas(doctor_seleccionado, citas_disponibles)).pack(pady=5)
+
+    def confirmar_eliminar_citas(self, doctor, citas_disponibles):
+        cita_seleccionada_fecha = self.cita_combobox.get()
+        cita_seleccionada = next((cita for cita in citas_disponibles if cita.fecha == cita_seleccionada_fecha), None)
+        if not cita_seleccionada:
+            messagebox.showerror("Error", "Cita no encontrada.")
+            return
+        doctor.agenda.remove(cita_seleccionada)
+        messagebox.showinfo("Éxito", "Cita eliminada con éxito.")
+
+    def mostrar_gestion_vacunas(self):
+        self.actualizar_frame_contenido("Gestionar Vacunas", "Seleccione una opción:", [])
+        opciones_vacunas = ["Registrar Vacuna", "Eliminar Vacuna", "Ver Información de Vacuna", "Agregar Cita a Vacuna", "Eliminar Cita de Vacuna"]
+        self.gestion_vacunas_combobox = ttk.Combobox(self.frame_contenido, values=opciones_vacunas)
+        self.gestion_vacunas_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_gestion_vacunas).pack(pady=5)
+    
+    def seleccionar_gestion_vacunas(self):
+        opcion = self.gestion_vacunas_combobox.get()
+        if opcion == "Registrar Vacuna":
+            self.registrar_vacuna()
+        elif opcion == "Eliminar Vacuna":
+            self.eliminar_vacuna()
+        elif opcion == "Ver Información de Vacuna":
+            self.ver_vacuna()
+        elif opcion == "Agregar Cita a Vacuna":
+            self.agregar_cita_vacuna()
+        elif opcion == "Eliminar Cita de Vacuna":
+            self.eliminar_cita_vacuna()
         else:
             messagebox.showerror("Error", "Opción inválida.")
     
@@ -279,6 +487,8 @@ class VentanaPrincipal(ttk.Frame):
             self.entry_cedula = ttk.Entry(self.frame_contenido)
             self.entry_cedula.pack(pady=5)
             ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.obtener_cedula(titulo)).pack(pady=5)
+        elif titulo.startswith("Gestionar"):
+            pass
         else:
             frame_tabla = ttk.Frame(self.frame_contenido)
             frame_tabla.pack(pady=5)
