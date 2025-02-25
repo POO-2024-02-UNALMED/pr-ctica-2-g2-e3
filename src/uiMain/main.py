@@ -1,6 +1,8 @@
 import sys
 import os
 
+DEBUG_MODE = False  # Cambiar a False para usar la GUI
+
 # 1. Add the project root to sys.path FIRST
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if project_root not in sys.path:
@@ -1150,8 +1152,11 @@ def eliminar_cita_vacuna(hospital: Hospital):
 def main():
     hospital = Hospital()  # Instanciar hospital
     cargar_todo(hospital)  # Cargar datos persistidos, si existen
-    app = Aplicacion(hospital)
-    app.mainloop()
+    if DEBUG_MODE:
+        menu_inicial(hospital)  # Modo consola
+    else:
+        app = Aplicacion(hospital)
+        app.mainloop()
 
 if __name__ == "__main__":
     main()
