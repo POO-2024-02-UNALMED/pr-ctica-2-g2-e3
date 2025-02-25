@@ -11,7 +11,7 @@ from gestorAplicacion.personas.Doctor import Doctor
 from gestorAplicacion.personas.Enfermedad import Enfermedad
 from gestorAplicacion.administracion.HistoriaClinica import HistoriaClinica
 
-from excepciones.ErrorAplicacion import ErrorRegistroNoEncontrado
+from excepciones.ErrorAplicacion import ErrorPacienteNoEncontrado
 
 class Inicio(ttk.Frame):
     def __init__(self, parent, switch_callback):
@@ -218,7 +218,7 @@ class VentanaPrincipal(ttk.Frame):
             # Verificar si el paciente existe
             paciente = self.hospital.buscarPaciente(int(cedula))
             if not paciente:
-                raise ErrorRegistroNoEncontrado(int(cedula))  # Lanza la excepción si el paciente no se encuentra
+                raise ErrorPacienteNoEncontrado(int(cedula))  # Lanza la excepción si el paciente no se encuentra
 
             # Si el paciente no tiene errores, hacer algo según el título
             if titulo == "Agendar Citas":
@@ -231,11 +231,10 @@ class VentanaPrincipal(ttk.Frame):
                 self.aplicar_vacunas(cedula)
             elif titulo == "Facturación":
                 self.facturacion(cedula)
-        except ErrorRegistroNoEncontrado as e:
+        except ErrorPacienteNoEncontrado as e:
             messagebox.showerror("Error", str(e))  # Muestra el mensaje de error de la excepción
         except ValueError as e:
             messagebox.showerror("Error", f"Valor incorrecto: {e}")  # En caso de que haya un error en el valor ingresado
-
 
     def mostrar_gestion_pacientes(self):
         self.actualizar_frame_contenido("Gestionar Pacientes", "Seleccione una opción:", [])
@@ -691,7 +690,7 @@ class VentanaPrincipal(ttk.Frame):
             messagebox.showerror("Error", "Opción inválida.")
             return
         
-        vacunas_disponibles = [vacuna for vacuna in self.hospital.vacunas if vacuna.tipo == tipo_vacuna]
+        vacunas_disponibles = [vacuna for vacuna in self.hospital.lista_vacunas if vacuna.tipo == tipo_vacuna]
         if not vacunas_disponibles:
             messagebox.showerror("Error", f"No hay vacunas {tipo_vacuna.lower()}s disponibles en el momento.")
             return
@@ -716,5 +715,100 @@ class VentanaPrincipal(ttk.Frame):
 
     def facturacion(self, cedula):
         from uiMain.main import facturacion
-        facturacion(self.hospital, cedula)
+        paciente = self.hospital.buscarPaciente(int(cedula))
+        if paciente is None:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+
+        servicios, total = facturacion(self.hospital, cedula)
+        if not servicios:
+            messagebox.showinfo("Información", "No se encontraron servicios facturables para este paciente.")
+            return
+
+        factura_detalle = "\n".join([f"{idx+1}. {desc} -- Costo: {costo}" for idx, (desc, costo) in enumerate(servicios)])
+        messagebox.showinfo("Factura Detallada", f"Servicios facturados:\n{factura_detalle}\n\nTotal a pagar: {total}")
+
+    def ver_vacuna(self):
+        self.actualizar_frame_contenido("Ver Información de Vacuna", "Seleccione la vacuna:", [])
         
+        vacunas_disponibles = [vacuna.nombre for vacuna in self.hospital.lista_vacunas]
+        self.vacuna_combobox = ttk.Combobox(self.frame_contenido, values=vacunas_disponibles)
+        self.vacuna_combobox.pack(pady=5)
+        
+        ttk.Button(self.frame_contenido, text="Ver", command=self.confirmar_ver_vacuna).pack(pady=5)
+
+    def confirmar_ver_vacuna(self):
+        nombre = self.vacuna_combobox.get()
+        vacuna = self.hospital.buscar_vacuna(nombre)
+        if vacuna is None:
+            messagebox.showerror("Error", "Esta vacuna no existe en el inventario del hospital.")
+        else:
+            info = f"Nombre: {vacuna.nombre}\nTipo: {vacuna.tipo}\nPrecio: {vacuna.precio}\nEPS disponibles: {', '.join(vacuna.tipo_eps)}"
+            messagebox.showinfo("Información de Vacuna", info)
+
+    def agregar_cita_vacuna(self):
+        self.actualizar_frame_contenido("Agregar Cita a Vacuna", "Ingrese los datos de la cita:", [])
+        
+        ttk.Label(self.frame_contenido, text="Nombre de la vacuna:").pack(pady=5)
+        self.entry_nombre_vacuna = ttk.Entry(self.frame_contenido)
+        self.entry_nombre_vacuna.pack(pady=5)
+        
+        ttk.Label(self.frame_contenido, text="Fecha de la cita (Ej: '6 de Marzo, 9:00 am'):").pack(pady=5)
+        self.entry_fecha_cita = ttk.Entry(self.frame_contenido)
+        self.entry_fecha_cita.pack(pady=5)
+        
+        ttk.Button(self.frame_contenido, text="Agregar", command=self.confirmar_agregar_cita_vacuna).pack(pady=5)
+
+    def confirmar_agregar_cita_vacuna(self):
+        nombre = self.entry_nombre_vacuna.get()
+        fecha = self.entry_fecha_cita.get()
+        vacuna = self.hospital.buscar_vacuna(nombre)
+        if vacuna is None:
+            messagebox.showerror("Error", "Esta vacuna no existe en el inventario del hospital.")
+            return
+        nueva_cita = CitaVacuna(fecha, None, vacuna)
+        vacuna.agenda.append(nueva_cita)
+        messagebox.showinfo("Éxito", "Nueva cita agregada con éxito a la vacuna.")
+
+    def eliminar_cita_vacuna(self):
+        self.actualizar_frame_contenido("Eliminar Cita de Vacuna", "Ingrese los datos de la cita:", [])
+        
+        ttk.Label(self.frame_contenido, text="Nombre de la vacuna:").pack(pady=5)
+        self.entry_nombre_vacuna = ttk.Entry(self.frame_contenido)
+        self.entry_nombre_vacuna.pack(pady=5)
+        
+        ttk.Button(self.frame_contenido, text="Ver Citas", command=self.confirmar_ver_citas_vacuna).pack(pady=5)
+
+    def confirmar_ver_citas_vacuna(self):
+        nombre = self.entry_nombre_vacuna.get()
+        vacuna = self.hospital.buscar_vacuna(nombre)
+        if vacuna is None:
+            messagebox.showerror("Error", "Esta vacuna no existe en el inventario del hospital.")
+            return
+        citas_disponibles = vacuna.mostrar_agenda_disponible()
+        if not citas_disponibles:
+            messagebox.showerror("Error", "No hay citas disponibles para eliminar en esta vacuna.")
+            return
+        self.actualizar_frame_contenido("Eliminar Cita de Vacuna", "Seleccione la cita a eliminar:", [])
+        self.cita_combobox = ttk.Combobox(self.frame_contenido, values=[cita.get_fecha() for cita in citas_disponibles])
+        self.cita_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Eliminar", command=lambda: self.confirmar_eliminar_cita_vacuna(vacuna, citas_disponibles)).pack(pady=5)
+
+    def confirmar_eliminar_cita_vacuna(self, vacuna, citas_disponibles):
+        fecha_cita = self.cita_combobox.get()
+        cita_a_eliminar = next((cita for cita in citas_disponibles if cita.get_fecha() == fecha_cita), None)
+        if cita_a_eliminar:
+            vacuna.agenda.remove(cita_a_eliminar)
+            messagebox.showinfo("Éxito", "¡Cita eliminada con éxito!")
+        else:
+            messagebox.showerror("Error", "Cita no encontrada.")
+
+    def ver_vacunas(self):
+        self.actualizar_frame_contenido("Vacunas Registradas", "Vacunas disponibles:", [])
+        vacunas = self.hospital.lista_vacunas
+        if vacunas:
+            for vacuna in vacunas:
+                ttk.Label(self.frame_contenido, text=f"Nombre: {vacuna.nombre}, Tipo: {vacuna.tipo}, Precio: {vacuna.precio}").pack(pady=5)
+        else:
+            ttk.Label(self.frame_contenido, text="No hay vacunas registradas.").pack(pady=5)
+

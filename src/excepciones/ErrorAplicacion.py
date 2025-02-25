@@ -26,6 +26,12 @@ class ValueErrorRegistro(ErrorRegistro):
     def __init__(self, mensaje: str):
         super().__init__(f"Valor incorrecto para paciente: {mensaje}")
 
+class ErrorPacienteNoEncontrado(Exception):
+    def __init__(self, cedula):
+        self.cedula = cedula
+        self.message = f"Paciente con cédula {cedula} no encontrado."
+        super().__init__(self.message)
+
 
 
 
