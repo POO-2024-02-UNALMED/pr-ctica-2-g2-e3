@@ -138,11 +138,18 @@ class VentanaPrincipal(ttk.Frame):
         menu_procesos.add_command(label="Aplicación de Vacunas", command=self.mostrar_aplicar_vacunas)
         menu_procesos.add_command(label="Facturación", command=self.mostrar_facturacion)
         
+        menu_gestion = Menu(self.menu_bar, tearoff=0)
+        menu_gestion.add_command(label="Gestionar Pacientes", command=self.mostrar_gestion_pacientes)
+        menu_gestion.add_command(label="Gestionar Vacunas", command=self.mostrar_gestion_vacunas)
+        menu_gestion.add_command(label="Gestionar Doctores", command=self.mostrar_gestion_doctores)
+        menu_gestion.add_command(label="Gestionar Hospital", command=self.mostrar_gestion_hospital)
+        
         menu_ayuda = Menu(self.menu_bar, tearoff=0)
         menu_ayuda.add_command(label="Acerca de", command=self.mostrar_autores)
         
         self.menu_bar.add_cascade(label="Archivo", menu=menu_archivo)
         self.menu_bar.add_cascade(menu=menu_procesos, label="Procesos y Consultas")
+        self.menu_bar.add_cascade(label="Gestión", menu=menu_gestion)
         self.menu_bar.add_cascade(label="Ayuda", menu=menu_ayuda)
         
         self.frame_contenido = ttk.Frame(self, borderwidth=2, relief="ridge")
@@ -170,6 +177,96 @@ class VentanaPrincipal(ttk.Frame):
     
     def mostrar_facturacion(self):
         self.actualizar_frame_contenido("Facturación", "Ingrese el número de cédula del paciente:", [])
+    
+    def mostrar_gestion_pacientes(self):
+        self.actualizar_frame_contenido("Gestionar Pacientes", "Seleccione una opción:", [])
+        opciones_pacientes = ["Registrar Paciente", "Registrar Enfermedad", "Eliminar Paciente", "Ver Paciente"]
+        self.gestion_pacientes_combobox = ttk.Combobox(self.frame_contenido, values=opciones_pacientes)
+        self.gestion_pacientes_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_gestion_pacientes).pack(pady=5)
+    
+    def seleccionar_gestion_pacientes(self):
+        opcion = self.gestion_pacientes_combobox.get()
+        if opcion == "Registrar Paciente":
+            self.registrar_paciente()
+        elif opcion == "Registrar Enfermedad":
+            self.registrar_nueva_enfermedad()
+        elif opcion == "Eliminar Paciente":
+            self.eliminar_paciente()
+        elif opcion == "Ver Paciente":
+            self.ver_paciente()
+        else:
+            messagebox.showerror("Error", "Opción inválida.")
+    
+    def mostrar_gestion_vacunas(self):
+        self.actualizar_frame_contenido("Gestionar Vacunas", "Seleccione una opción:", [])
+        opciones_vacunas = ["Registrar Vacuna", "Eliminar Vacuna", "Ver Información de Vacuna", "Agregar Cita a Vacuna", "Eliminar Cita de Vacuna"]
+        self.gestion_vacunas_combobox = ttk.Combobox(self.frame_contenido, values=opciones_vacunas)
+        self.gestion_vacunas_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_gestion_vacunas).pack(pady=5)
+    
+    def seleccionar_gestion_vacunas(self):
+        opcion = self.gestion_vacunas_combobox.get()
+        if opcion == "Registrar Vacuna":
+            self.registrar_vacuna()
+        elif opcion == "Eliminar Vacuna":
+            self.eliminar_vacuna()
+        elif opcion == "Ver Información de Vacuna":
+            self.ver_vacuna()
+        elif opcion == "Agregar Cita a Vacuna":
+            self.agregar_cita_vacuna()
+        elif opcion == "Eliminar Cita de Vacuna":
+            self.eliminar_cita_vacuna()
+        else:
+            messagebox.showerror("Error", "Opción inválida.")
+    
+    def mostrar_gestion_doctores(self):
+        self.actualizar_frame_contenido("Gestionar Doctores", "Seleccione una opción:", [])
+        opciones_doctores = ["Registrar Doctor", "Eliminar Doctor", "Ver Doctor", "Agregar Citas", "Eliminar Citas"]
+        self.gestion_doctores_combobox = ttk.Combobox(self.frame_contenido, values=opciones_doctores)
+        self.gestion_doctores_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_gestion_doctores).pack(pady=5)
+    
+    def seleccionar_gestion_doctores(self):
+        opcion = self.gestion_doctores_combobox.get()
+        if opcion == "Registrar Doctor":
+            self.registrar_doctor()
+        elif opcion == "Eliminar Doctor":
+            self.eliminar_doctor()
+        elif opcion == "Ver Doctor":
+            self.ver_doctor()
+        elif opcion == "Agregar Citas":
+            self.agregar_citas()
+        elif opcion == "Eliminar Citas":
+            self.eliminar_citas()
+        else:
+            messagebox.showerror("Error", "Opción inválida.")
+    
+    def mostrar_gestion_hospital(self):
+        self.actualizar_frame_contenido("Gestionar Hospital", "Seleccione una opción:", [])
+        opciones_hospital = ["Construir Habitación", "Ver Lista de Habitaciones", "Destruir Habitación", "Agregar Medicamentos", "Ver Inventario de Medicamentos", "Ver Personas Registradas", "Ver Vacunas Registradas"]
+        self.gestion_hospital_combobox = ttk.Combobox(self.frame_contenido, values=opciones_hospital)
+        self.gestion_hospital_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_gestion_hospital).pack(pady=5)
+    
+    def seleccionar_gestion_hospital(self):
+        opcion = self.gestion_hospital_combobox.get()
+        if opcion == "Construir Habitación":
+            self.construir_habitacion()
+        elif opcion == "Ver Lista de Habitaciones":
+            self.ver_habitacion()
+        elif opcion == "Destruir Habitación":
+            self.destruir_habitacion()
+        elif opcion == "Agregar Medicamentos":
+            self.agregar_medicamentos()
+        elif opcion == "Ver Inventario de Medicamentos":
+            self.ver_medicamentos()
+        elif opcion == "Ver Personas Registradas":
+            self.ver_personas_registradas()
+        elif opcion == "Ver Vacunas Registradas":
+            self.ver_vacunas()
+        else:
+            messagebox.showerror("Error", "Opción inválida.")
 
     def actualizar_frame_contenido(self, titulo, descripcion, criterios_valores):
         for widget in self.frame_contenido.winfo_children():
@@ -349,8 +446,41 @@ class VentanaPrincipal(ttk.Frame):
         messagebox.showinfo("Éxito", f"Habitación asignada con éxito.\nPaciente: {paciente.nombre}\nHabitación número: {habitacion_seleccionada.numero}\nCategoría: {habitacion_seleccionada.categoria.name}\nDías de hospedaje: {dias}\nCosto total: {costo_total}")
 
     def aplicar_vacunas(self, cedula):
-        from uiMain.main import vacunacion
-        vacunacion(self.hospital, cedula)
+        self.cedula = cedula
+        self.actualizar_frame_contenido("Seleccione el tipo de vacuna", "Seleccione el tipo de vacuna que desea aplicar:", [])
+        
+        self.tipo_vacuna_combobox = ttk.Combobox(self.frame_contenido, values=["Obligatoria", "No Obligatoria"])
+        self.tipo_vacuna_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=self.seleccionar_tipo_vacuna).pack(pady=5)
+
+    def seleccionar_tipo_vacuna(self):
+        tipo_vacuna = self.tipo_vacuna_combobox.get()
+        if tipo_vacuna not in ["Obligatoria", "No Obligatoria"]:
+            messagebox.showerror("Error", "Opción inválida.")
+            return
+        
+        vacunas_disponibles = [vacuna for vacuna in self.hospital.vacunas if vacuna.tipo == tipo_vacuna]
+        if not vacunas_disponibles:
+            messagebox.showerror("Error", f"No hay vacunas {tipo_vacuna.lower()}s disponibles en el momento.")
+            return
+        
+        self.actualizar_frame_contenido("Seleccione la vacuna", "Vacunas disponibles:", [])
+        self.vacuna_combobox = ttk.Combobox(self.frame_contenido, values=[vacuna.nombre for vacuna in vacunas_disponibles])
+        self.vacuna_combobox.pack(pady=5)
+        ttk.Button(self.frame_contenido, text="Aceptar", command=lambda: self.confirmar_vacuna(vacunas_disponibles)).pack(pady=5)
+
+    def confirmar_vacuna(self, vacunas_disponibles):
+        vacuna_seleccionada_nombre = self.vacuna_combobox.get()
+        vacuna_seleccionada = next((vacuna for vacuna in vacunas_disponibles if vacuna.nombre == vacuna_seleccionada_nombre), None)
+        if not vacuna_seleccionada:
+            messagebox.showerror("Error", "Vacuna no encontrada.")
+            return
+        
+        paciente = self.hospital.buscarPaciente(int(self.cedula))
+        if not paciente:
+            messagebox.showerror("Error", "Paciente no encontrado.")
+            return
+        messagebox.showinfo("Éxito", f"Vacuna '{vacuna_seleccionada.nombre}' aplicada con éxito para la cédula {self.cedula}.")
 
     def facturacion(self, cedula):
         from uiMain.main import facturacion
